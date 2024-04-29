@@ -31,6 +31,8 @@ class CommonHelper
 
         if (isset($q_params['sortOrder']) && isset($q_params['sortField'])) {
             $query->orderBy($q_params['sortField'], Sorting::ORDER_OPTIONS[$q_params['sortOrder']]);
+        } else {
+            $query->orderBy('created_at', 'asc');
         }
     }
 

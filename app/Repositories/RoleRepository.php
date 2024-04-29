@@ -27,6 +27,11 @@ class RoleRepository
             $model->where('name', 'like', "%$name%");
         }
 
+        $uuid = Arr::get($data, 'filter.uuid');
+        if (!empty($uuid)) {
+            $model->where('uuid', '=', "$uuid");
+        }
+
         return $model;
     }
 

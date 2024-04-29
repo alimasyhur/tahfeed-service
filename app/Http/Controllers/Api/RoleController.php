@@ -7,6 +7,7 @@ use App\Constants\Pagination;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Repositories\RoleRepository;
+use App\Repositories\RoleUserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -14,11 +15,14 @@ use Illuminate\Validation\Rule;
 class RoleController extends Controller
 {
     protected $repository;
+    protected $roleUserRepository;
     public function __construct(
         RoleRepository $repository,
+        RoleUserRepository $roleUserRepository
     )
     {
         $this->repository = $repository;
+        $this->roleUserRepository = $roleUserRepository;
     }
 
     public function index(Request $request)
@@ -153,8 +157,8 @@ class RoleController extends Controller
     public function destroy($uuid)
     {
         try {
-            $roleUserFilter = ['filter' => ['uuid' => $uuid]];
-            $totalRoleUser = $this->repository->count($roleUserFilter);
+            $roleUserFilter = ['filter' => ['role_uuid' => $uuid]];
+            $totalRoleUser = $this->roleUserRepository->count($roleUserFilter);
 
             if (!empty($totalRoleUser)) {
                 return response()->json([

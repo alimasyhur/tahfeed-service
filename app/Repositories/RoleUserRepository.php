@@ -31,6 +31,11 @@ class RoleUserRepository
             $model->where('uuid', '=', $uuid);
         }
 
+        $roleUuid = Arr::get($data, 'filter.role_uuid');
+        if (!empty($roleUuid)) {
+            $model->where('role_uuid', '=', $roleUuid);
+        }
+
         $userUuid = Arr::get($data, 'filter.user_uuid');
         if (!empty($userUuid)) {
             $model->where('user_uuid', '=', $userUuid);
