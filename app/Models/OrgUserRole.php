@@ -27,4 +27,9 @@ class OrgUserRole extends Model
         'is_active',
         'is_confirmed',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -14,6 +14,7 @@ class Role extends Model
 
     protected $primaryKey = 'uuid';
 
+    const ROLE_SUPER_ADMIN = "Super Admin";
     const ROLE_ADMIN = "Admin";
 
     /**

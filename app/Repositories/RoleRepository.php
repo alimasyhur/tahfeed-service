@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Helpers\CommonHelper;
 use App\Models\Role;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class RoleRepository
 {
@@ -30,6 +31,11 @@ class RoleRepository
         $uuid = Arr::get($data, 'filter.uuid');
         if (!empty($uuid)) {
             $model->where('uuid', '=', "$uuid");
+        }
+
+        $roleName = Arr::get($data, 'filter.role_name');
+        if (!empty($roleName) && ($roleName !== Role::ROLE_SUPER_ADMIN)) {
+            $model->where('name', '!=', Role::ROLE_SUPER_ADMIN);
         }
 
         return $model;
@@ -71,8 +77,12 @@ class RoleRepository
 
     public function update($uuid, $data)
     {
+        DB::transaction(function () use($uuid, $data) {
+            DB::table('roles')->where('uuid', $uuid)->update($data);
+            DB::table('orgs_users_roles')->where('role_uuid', $uuid)->update(['role_name' => Arr::get($data, 'name')]);
+        });
+
         $model = Role::findOrFail($uuid);
-        $model->update($data);
 
         $model->fresh();
         return $model;

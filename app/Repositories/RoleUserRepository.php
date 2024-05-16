@@ -6,7 +6,11 @@ use App\Constants\RoleUserStatus;
 use App\Helpers\CommonHelper;
 use App\Models\OrgUserRole;
 use App\Models\Role;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class RoleUserRepository
 {
@@ -16,7 +20,12 @@ class RoleUserRepository
 
     private function getQuery($data = null)
     {
-        $model = OrgUserRole::query();
+        $model = OrgUserRole::join('users', 'orgs_users_roles.user_uuid', '=', 'users.uuid')
+            ->select(
+                'orgs_users_roles.*',
+                'users.name as user_name',
+                'users.email as email'
+            );
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
@@ -89,15 +98,59 @@ class RoleUserRepository
 
     public function add($data)
     {
-        $model = new OrgUserRole();
-        $model->user_uuid = Arr::get($data, 'user_uuid');
-        $model->org_uuid = Arr::get($data, 'org_uuid');
-        $model->org_name = Arr::get($data, 'org_name');
-        $model->role_uuid = Arr::get($data, 'role_uuid');
-        $model->role_name = Arr::get($data, 'role_name');
-        $model->is_active = RoleUserStatus::ACTIVE;
-        $model->is_confirmed = RoleUserStatus::VERIFICATION_PENDING;
-        $model->save();
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'name' => Arr::get($data, 'user_name'),
+                'email' => Arr::get($data, 'email'),
+                'password' => Hash::make(Arr::get($data, 'password')),
+            ]);
+
+            $model = new OrgUserRole();
+            $model->user_uuid = $user->uuid;
+            $model->org_uuid = Arr::get($data, 'org_uuid');
+            $model->org_name = Arr::get($data, 'org_name');
+            $model->role_uuid = Arr::get($data, 'role_uuid');
+            $model->role_name = Arr::get($data, 'role_name');
+            $model->is_active = Arr::get($data, 'is_active');
+            $model->is_confirmed = Arr::get($data, 'is_confirmed');
+            $model->save();
+
+            DB::commit();
+
+            return $model->find($model->uuid);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function update($uuid, $data)
+    {
+        DB::transaction(function () use($uuid, $data) {
+            DB::table('orgs_users_roles')->where('uuid', $uuid)->update([
+                'uuid' => $uuid,
+                'org_uuid' => Arr::get($data, 'org_uuid'),
+                'org_name' => Arr::get($data, 'org_name'),
+                'role_uuid' => Arr::get($data, 'role_uuid'),
+                'role_name' => Arr::get($data, 'role_name'),
+                'is_active' => Arr::get($data, 'is_active'),
+                'is_confirmed' => Arr::get($data, 'is_confirmed'),
+                'updated_at' => Carbon::now(),
+            ]);
+            DB::table('users')->where('uuid', Arr::get($data, 'user_uuid'))
+                ->update([
+                    'name' => Arr::get($data, 'user_name'),
+                    'email' => Arr::get($data, 'email'),
+                    'updated_at' => Carbon::now(),
+                ]);
+        });
+
+        $modelUser = User::findOrFail(Arr::get($data, 'user_uuid'));
+
+        $model = OrgUserRole::findOrFail($uuid);
+        $model->user_name = $modelUser->name;
+        $model->email = $modelUser->email;
 
         return $model;
     }
@@ -111,5 +164,24 @@ class RoleUserRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    public static function isSuperAdmin($userUuid)
+    {
+        $role = OrgUserRole::where('user_uuid', $userUuid)
+            ->where('role_name', 'Super Admin')
+            ->count();
+
+        return $role > 0;
+    }
+
+    public static function isAllowedChangeRoleAdmin($userOrgRole)
+    {
+        $role = OrgUserRole::where('org_uuid', $userOrgRole->org_uuid)
+            ->where('uuid', '!=', $userOrgRole->uuid)
+            ->where('role_name', 'Admin')
+            ->count();
+
+        return $role > 0;
     }
 }

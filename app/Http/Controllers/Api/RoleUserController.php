@@ -100,38 +100,19 @@ class RoleUserController extends Controller
             $data = $request->all();
 
             $rules = [
-                'user_uuid' => [
-                    'required',
-                    'string',
-                    Rule::unique('orgs_users_roles')->where(function($query) use ($data) {
-                        return $query->where('user_uuid', $data['user_uuid'])
-                                ->where('org_uuid', $data['org_uuid'])
-                                ->where('role_uuid', $data['role_uuid']);
-                    })
-                ],
+                'user_name' => ['required', 'string'],
+                'email' => ['required', 'string', 'max:255', 'unique:users'],
+                'password' => 'required|string|min:8',
                 'org_uuid' => ['required', 'string'],
                 'role_uuid'=> ['required', 'string'],
+                'is_active'  => ['required', 'integer'],
+                'is_confirmed'  => ['required', 'integer'],
             ];
 
-            $customMessages = [
-                'user_uuid.unique' => 'User is already assigned to this role',
-            ];
-
-            $validator = Validator::make($data, $rules, $customMessages);
+            $validator = Validator::make($data, $rules);
 
             $validator->validate();
             $validator = $validator->safe()->all();
-
-
-            $userUuid = Arr::get($validator, 'user_uuid');
-            $user = $this->userRepository->find($userUuid);
-            if(empty($user)) {
-                return response()->json([
-                    'status' => RoleResponse::ERROR,
-                    'message' => UserResponse::NOT_FOUND,
-                    'data' => $validator,
-                ], 422);
-            }
 
             $orgUuid = Arr::get($validator, 'org_uuid');
             $org = $this->orgRepository->findByUUID($orgUuid);
@@ -156,6 +137,101 @@ class RoleUserController extends Controller
             Arr::set($validator, 'role_name', $role->name);
 
             $roleUser = $this->repository->add($validator);
+
+            return response()->json([
+                'status' => RoleResponse::SUCCESS,
+                'message' => RoleResponse::SUCCESS_CREATED,
+                'data' => $roleUser,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => RoleResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function update($uuid, Request $request)
+    {
+        try {
+            $userOrgRole = $this->repository->find($uuid);
+            if (empty($userOrgRole)) {
+                return response()->json([
+                    'status' => RoleResponse::SUCCESS,
+                    'message' => RoleResponse::NOT_FOUND,
+                    'data' => $userOrgRole,
+                ], 201);
+            }
+
+            $isAllowedChangeRoleAdmin = RoleUserRepository::isAllowedChangeRoleAdmin($userOrgRole);
+            if (!$isAllowedChangeRoleAdmin) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::UNABLE_CHANGE_ADMIN_ROLE,
+                    'data' => $userOrgRole,
+                ], 201);
+            }
+
+            $roleUuid = $request->input('role_uuid');
+
+            $data = $request->all();
+
+            $rules = [
+                'user_name'  => 'sometimes|string',
+                'email' => 'sometimes|string',
+                'role_uuid'=> 'sometimes|string',
+                'is_active'  => 'sometimes|integer',
+                'is_confirmed'  => 'sometimes|integer',
+            ];
+
+            $customMessages = [
+                'user_uuid.unique' => 'User is already assigned to this role',
+            ];
+
+            $validator = Validator::make($data, $rules, $customMessages);
+
+            $validator->validate();
+            $validator = $validator->safe()->all();
+
+            $user = $this->userRepository->find($userOrgRole->user_uuid);
+            if(empty($user)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => UserResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+            $userName = $user->name;
+            if (Arr::get($validator, 'user_name') !== $userName) {
+                $userName = Arr::get($validator, 'user_name');
+            }
+            Arr::set($validator, 'user_uuid', $user->uuid);
+            Arr::set($validator, 'user_name', $userName);
+
+            $userEmail = $user->email;
+            if (Arr::get($validator, 'user_email') !== $userEmail) {
+                $userEmail = Arr::get($validator, 'user_email');
+            }
+            Arr::set($validator, 'user_email', $userEmail);
+
+            $roleUuid = Arr::get($validator, 'role_uuid');
+            $role = $this->roleRepository->find($roleUuid);
+            if(empty($role)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => OrganizationResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+            Arr::set($validator, 'role_name', $role->name);
+            Arr::set($validator, 'org_uuid', $userOrgRole->org_uuid);
+            Arr::set($validator, 'org_name', $userOrgRole->org_name);
+
+
+            $roleUser = $this->repository->update($uuid, $validator);
 
             return response()->json([
                 'status' => RoleResponse::SUCCESS,

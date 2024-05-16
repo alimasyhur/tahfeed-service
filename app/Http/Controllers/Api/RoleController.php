@@ -10,7 +10,6 @@ use App\Repositories\RoleRepository;
 use App\Repositories\RoleUserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
@@ -31,6 +30,7 @@ class RoleController extends Controller
             $validator = Validator::make($request->all(), [
                 'q' => 'nullable|string',
                 'filter.name' => 'nullable|string',
+                'filter.role_name' => 'sometimes|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),

@@ -96,7 +96,62 @@ class OrganizationRepository
 
         CommonHelper::sortPageFilter($model, $data);
 
-        return $model->get();
+        $response = $model->get();
+
+        return $response->map(function ($organization) {
+            if ($organization->is_active == 1) {
+                $organization->is_active_label = 'active';
+                $organization->is_active_label_color = 'info';
+            } else {
+                $organization->is_active_label = 'not active';
+                $organization->is_active_label_color = 'warning';
+            }
+
+            if ($organization->is_verified == 1) {
+                $organization->is_verified_label = 'verified';
+                $organization->is_verified_label_color = 'info';
+            } else if ($organization->is_verified == 2) {
+                $organization->is_verified_label = 'rejected';
+                $organization->is_verified_label_color = 'error';
+            } else {
+                $organization->is_verified_label = 'not verified';
+                $organization->is_verified_label_color = 'warning';
+            }
+
+            return $organization;
+        });
+    }
+
+    public function findForUpdate($uuid, $userUuid)
+    {
+        if (RoleUserRepository::isSuperAdmin($userUuid)) {
+            $organization = Organization::where('uuid', $uuid)
+                ->first();
+
+            return $organization;
+        }
+
+        $organization = Organization::where('created_by', $userUuid)
+            ->where('uuid', $uuid)
+            ->first();
+
+        return $organization;
+    }
+
+    public function findByDomain($domain, $userUuid)
+    {
+        if (RoleUserRepository::isSuperAdmin($userUuid)) {
+            $organization = Organization::where('domain', $domain)
+                ->first();
+        } else {
+            $organization = Organization::where('created_by', $userUuid)
+                ->where('domain', $domain)
+                ->first();
+        }
+
+        $organization = $this->includeLabel($organization);
+
+        return $organization;
     }
 
     public function find($userUuid)
@@ -112,28 +167,7 @@ class OrganizationRepository
         $organization = Organization::where('uuid', $uuid)
             ->first();
 
-        if (!$organization) {
-            return null;
-        }
-
-        if ($organization->is_active == 1) {
-            $organization->is_active_label = 'active';
-            $organization->is_active_label_color = 'info';
-        } else {
-            $organization->is_active_label = 'not active';
-            $organization->is_active_label_color = 'warning';
-        }
-
-        if ($organization->is_verified == 1) {
-            $organization->is_verified_label = 'verified';
-            $organization->is_verified_label_color = 'info';
-        } else if ($organization->is_verified == 2) {
-            $organization->is_verified_label = 'rejected';
-            $organization->is_verified_label_color = 'error';
-        } else {
-            $organization->is_verified_label = 'not verified';
-            $organization->is_verified_label_color = 'warning';
-        }
+        $organization = $this->includeLabel($organization);
 
         return $organization;
     }
@@ -208,5 +242,32 @@ class OrganizationRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    protected function includeLabel($organization) {
+        if (!$organization) {
+            return null;
+        }
+
+        if ($organization->is_active == 1) {
+            $organization->is_active_label = 'active';
+            $organization->is_active_label_color = 'info';
+        } else {
+            $organization->is_active_label = 'not active';
+            $organization->is_active_label_color = 'warning';
+        }
+
+        if ($organization->is_verified == 1) {
+            $organization->is_verified_label = 'verified';
+            $organization->is_verified_label_color = 'info';
+        } else if ($organization->is_verified == 2) {
+            $organization->is_verified_label = 'rejected';
+            $organization->is_verified_label_color = 'error';
+        } else {
+            $organization->is_verified_label = 'not verified';
+            $organization->is_verified_label_color = 'warning';
+        }
+
+        return $organization;
     }
 }
