@@ -45,7 +45,7 @@ class UserRepository
 
         CommonHelper::sortPageFilter($model, $data);
 
-        $response = $model->get();
+        $response = $model->with('orgUsers')->get();
 
         return $response;
     }

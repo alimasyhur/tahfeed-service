@@ -184,4 +184,63 @@ class RoleUserRepository
 
         return $role > 0;
     }
+
+    public function findByUserUuid($userUuid)
+    {
+        $role = OrgUserRole::where('user_uuid', $userUuid)
+            ->first();
+
+        return $role;
+    }
+
+    public function isActiveRole($userUuid)
+    {
+        $hasActiveRole = OrgUserRole::where('user_uuid', $userUuid)
+            ->where('is_active', 1)
+            ->count();
+
+        return $hasActiveRole > 0;
+    }
+
+    public function assign($data)
+    {
+        try {
+            $model = new OrgUserRole();
+            $model->user_uuid = Arr::get($data, 'user_uuid');
+            $model->org_uuid = Arr::get($data, 'org_uuid');
+            $model->org_name = Arr::get($data, 'org_name');
+            $model->role_uuid = Arr::get($data, 'role_uuid');
+            $model->role_name = Arr::get($data, 'role_name');
+            $model->is_active = 1;
+            $model->is_confirmed = 1;
+            $model->save();
+
+            return $model->find($model->uuid);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public static function isAlreadyAssigned($data)
+    {
+        $role = OrgUserRole::where('org_uuid', Arr::get($data, 'org_uuid'))
+            ->where('user_uuid', Arr::get($data, 'user_uuid'))
+            ->where('role_uuid', Arr::get($data, 'role_uuid'))
+            ->count();
+
+        return $role > 0;
+    }
+
+    public function browseOptions($data = null)
+    {
+        $model = $this->getQuery($data);
+
+        CommonHelper::sortPageFilter($model, $data);
+
+        $userUUIDList = $model->pluck('user_uuid')->toArray();
+
+        $response = User::select('uuid', 'email')->whereIn('uuid', $userUUIDList)->get();
+
+        return $response;
+    }
 }

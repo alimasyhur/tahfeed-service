@@ -94,25 +94,29 @@ class RoleUserController extends Controller
     public function store(Request $request)
     {
         try {
-            $roleUuid = $request->input('role_uuid');
-            $orgUuid = $request->input('org_uuid');
-
             $data = $request->all();
 
             $rules = [
-                'user_name' => ['required', 'string'],
-                'email' => ['required', 'string', 'max:255', 'unique:users'],
-                'password' => 'required|string|min:8',
-                'org_uuid' => ['required', 'string'],
+                'user_uuid' => ['required', 'string'],
                 'role_uuid'=> ['required', 'string'],
-                'is_active'  => ['required', 'integer'],
-                'is_confirmed'  => ['required', 'integer'],
+                'org_uuid' => ['required', 'string'],
             ];
 
             $validator = Validator::make($data, $rules);
 
             $validator->validate();
             $validator = $validator->safe()->all();
+
+            $userUuid = Arr::get($validator, 'user_uuid');
+            $user = $this->userRepository->find($userUuid);
+            if(empty($user)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => UserResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+            Arr::set($validator, 'user_name', $user->name);
 
             $orgUuid = Arr::get($validator, 'org_uuid');
             $org = $this->orgRepository->findByUUID($orgUuid);
@@ -136,7 +140,16 @@ class RoleUserController extends Controller
             }
             Arr::set($validator, 'role_name', $role->name);
 
-            $roleUser = $this->repository->add($validator);
+            $isAlreadyAssigned = RoleUserRepository::isAlreadyAssigned($validator);
+            if ($isAlreadyAssigned) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::ALREADY_ASSIGNED,
+                    'data' => $validator,
+                ], 422);
+            }
+
+            $roleUser = $this->repository->assign($validator);
 
             return response()->json([
                 'status' => RoleResponse::SUCCESS,
@@ -166,17 +179,6 @@ class RoleUserController extends Controller
                 ], 201);
             }
 
-            $isAllowedChangeRoleAdmin = RoleUserRepository::isAllowedChangeRoleAdmin($userOrgRole);
-            if (!$isAllowedChangeRoleAdmin) {
-                return response()->json([
-                    'status' => RoleResponse::ERROR,
-                    'message' => RoleResponse::UNABLE_CHANGE_ADMIN_ROLE,
-                    'data' => $userOrgRole,
-                ], 201);
-            }
-
-            $roleUuid = $request->input('role_uuid');
-
             $data = $request->all();
 
             $rules = [
@@ -195,6 +197,25 @@ class RoleUserController extends Controller
 
             $validator->validate();
             $validator = $validator->safe()->all();
+
+            $roleUuid = Arr::get($validator, 'role_uuid');
+            $role = $this->roleRepository->find($roleUuid);
+            if(empty($role)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => OrganizationResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+
+            $isAllowedChangeRoleAdmin = RoleUserRepository::isAllowedChangeRoleAdmin($userOrgRole);
+            if (!$isAllowedChangeRoleAdmin) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::UNABLE_CHANGE_ADMIN_ROLE,
+                    'data' => $userOrgRole,
+                ], 201);
+            }
 
             $user = $this->userRepository->find($userOrgRole->user_uuid);
             if(empty($user)) {
@@ -217,15 +238,6 @@ class RoleUserController extends Controller
             }
             Arr::set($validator, 'user_email', $userEmail);
 
-            $roleUuid = Arr::get($validator, 'role_uuid');
-            $role = $this->roleRepository->find($roleUuid);
-            if(empty($role)) {
-                return response()->json([
-                    'status' => RoleResponse::ERROR,
-                    'message' => OrganizationResponse::NOT_FOUND,
-                    'data' => $validator,
-                ], 422);
-            }
             Arr::set($validator, 'role_name', $role->name);
             Arr::set($validator, 'org_uuid', $userOrgRole->org_uuid);
             Arr::set($validator, 'org_name', $userOrgRole->org_name);
@@ -260,6 +272,38 @@ class RoleUserController extends Controller
                 'status' => RoleResponse::SUCCESS,
                 'message' => RoleResponse::SUCCESS_DELETED,
             ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => RoleResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function option(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.name' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $roles = $this->repository->browseOptions($validator);
+
+            return response()->json([
+                'status' => RoleResponse::SUCCESS,
+                'message' => RoleResponse::SUCCESS_ALL_RETRIEVED,
+                'data' => $roles,
+            ]);
+
         } catch (\Throwable $th) {
             $errMessage = $th->getMessage();
             $errCode = CommonHelper::getStatusCode($errMessage);

@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function() {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
+        Route::post('/reset-password', [\App\Http\Controllers\Api\AuthController::class, 'resetPassword']);
     });
 });
 
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('roles')->group(function() {
         Route::get('/users', [\App\Http\Controllers\Api\RoleUserController::class, 'index']);
+        Route::get('/users/options', [\App\Http\Controllers\Api\RoleUserController::class, 'option']);
         Route::post('/users', [\App\Http\Controllers\Api\RoleUserController::class, 'store']);
         Route::patch('/users/{uuid}', [\App\Http\Controllers\Api\RoleUserController::class, 'update']);
 
