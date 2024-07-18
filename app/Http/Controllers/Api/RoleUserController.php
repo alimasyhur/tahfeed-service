@@ -139,6 +139,7 @@ class RoleUserController extends Controller
                 ], 422);
             }
             Arr::set($validator, 'role_name', $role->name);
+            Arr::set($validator, 'constant_value', $role->constant_value);
 
             $isAlreadyAssigned = RoleUserRepository::isAlreadyAssigned($validator);
             if ($isAlreadyAssigned) {

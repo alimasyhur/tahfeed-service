@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid('user_uuid');
             $table->uuid('role_uuid');
             $table->string('role_name');
+            $table->tinyInteger('constant_value');
             $table->tinyInteger('is_active');
             $table->tinyInteger('is_confirmed');
             $table->timestamps();

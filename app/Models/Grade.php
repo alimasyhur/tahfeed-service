@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Organization extends Model
+class Grade extends Model
 {
     use HasUuids, HasFactory;
 
-    protected $table = "organizations";
+    protected $table = "grades";
 
     protected $primaryKey = 'uuid';
-
     /**
      * The attributes that are mass assignable.
      *
@@ -21,13 +20,8 @@ class Organization extends Model
      */
     protected $fillable = [
         'name',
-        'domain',
-        'bio',
-        'address',
-        'email',
-        'phone',
-        'is_verified',
-        'is_active',
-        'created_by',
+        'description',
+        'org_uuid',
+        'period',
     ];
 }
