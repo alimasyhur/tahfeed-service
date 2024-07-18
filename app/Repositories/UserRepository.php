@@ -8,6 +8,7 @@ use App\Helpers\CommonHelper;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
 
 class UserRepository
 {
@@ -63,5 +64,19 @@ class UserRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    public function register($user) {
+        try {
+            $user = User::create([
+                'name' => Arr::get($user, 'user_name'),
+                'email' => Arr::get($user, 'email'),
+                'password' => Hash::make(Arr::get($user, 'password')),
+            ]);
+
+            return $user->find($user->uuid);
+        } catch (\Exception $e) {
+        throw $e;
+    }
     }
 }

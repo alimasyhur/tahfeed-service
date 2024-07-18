@@ -211,6 +211,7 @@ class RoleUserRepository
             $model->org_name = Arr::get($data, 'org_name');
             $model->role_uuid = Arr::get($data, 'role_uuid');
             $model->role_name = Arr::get($data, 'role_name');
+            $model->constant_value = Arr::get($data, 'constant_value');
             $model->is_active = 1;
             $model->is_confirmed = 1;
             $model->save();
@@ -239,7 +240,7 @@ class RoleUserRepository
 
         $userUUIDList = $model->pluck('user_uuid')->toArray();
 
-        $response = User::select('uuid', 'email')->whereIn('uuid', $userUUIDList)->get();
+        $response = User::select('uuid', 'name', 'email')->whereIn('uuid', $userUUIDList)->orderBy('email', 'asc')->get();
 
         return $response;
     }

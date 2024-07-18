@@ -97,6 +97,88 @@ class RoleUserController extends Controller
             $data = $request->all();
 
             $rules = [
+                'email' => ['required', 'string'],
+                'user_name'=> ['required', 'string'],
+                'password'=> ['required', 'string'],
+                'is_confirmed' => ['required', 'integer'],
+                'is_active' => ['required', 'integer'],
+                'role_uuid' => ['required', 'string'],
+                'org_uuid' => ['required', 'string'],
+            ];
+
+            $validator = Validator::make($data, $rules);
+
+            $validator->validate();
+            $validator = $validator->safe()->all();
+
+            $orgUuid = Arr::get($validator, 'org_uuid');
+            $org = $this->orgRepository->findByUUID($orgUuid);
+            if(empty($org)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => OrganizationResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+            Arr::set($validator, 'org_name', $org->name);
+
+            $roleUuid = Arr::get($validator, 'role_uuid');
+            $role = $this->roleRepository->find($roleUuid);
+            if(empty($role)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => OrganizationResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+            Arr::set($validator, 'role_name', $role->name);
+            Arr::set($validator, 'constant_value', $role->constant_value);
+
+            $user = $this->userRepository->register($validator);
+            if(empty($user)) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => UserResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
+
+            Arr::set($validator, 'user_name', $user->name);
+            Arr::set($validator, 'user_uuid', $user->uuid);
+
+            $isAlreadyAssigned = RoleUserRepository::isAlreadyAssigned($validator);
+            if ($isAlreadyAssigned) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::ALREADY_ASSIGNED,
+                    'data' => $validator,
+                ], 422);
+            }
+
+            $roleUser = $this->repository->assign($validator);
+
+            return response()->json([
+                'status' => RoleResponse::SUCCESS,
+                'message' => RoleResponse::SUCCESS_CREATED,
+                'data' => $roleUser,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => RoleResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function assign(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            $rules = [
                 'user_uuid' => ['required', 'string'],
                 'role_uuid'=> ['required', 'string'],
                 'org_uuid' => ['required', 'string'],
@@ -238,11 +320,18 @@ class RoleUserController extends Controller
                 $userEmail = Arr::get($validator, 'user_email');
             }
             Arr::set($validator, 'user_email', $userEmail);
-
             Arr::set($validator, 'role_name', $role->name);
             Arr::set($validator, 'org_uuid', $userOrgRole->org_uuid);
             Arr::set($validator, 'org_name', $userOrgRole->org_name);
 
+            $isAlreadyAssigned = RoleUserRepository::isAlreadyAssigned($validator);
+            if ($isAlreadyAssigned) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::ALREADY_ASSIGNED,
+                    'data' => $validator,
+                ], 422);
+            }
 
             $roleUser = $this->repository->update($uuid, $validator);
 

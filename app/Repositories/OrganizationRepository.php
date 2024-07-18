@@ -191,7 +191,7 @@ class OrganizationRepository
             $model->created_by = $createdBy;
             $model->save();
 
-            $role = $this->roleRepository->findByName(Role::ROLE_ADMIN);
+            $role = $this->roleRepository->findByName(Role::ROLE_SUPER_ADMIN);
 
             $roleUser = new OrgUserRole();
             $roleUser->org_uuid = $model->uuid;
@@ -199,6 +199,7 @@ class OrganizationRepository
             $roleUser->user_uuid = $createdBy;
             $roleUser->role_uuid = $role->uuid;
             $roleUser->role_name = $role->name;
+            $roleUser->constant_value = $role->constant_value;
             $roleUser->is_active = RoleUserStatus::ACTIVE;
             $roleUser->is_confirmed = RoleUserStatus::VERIFIED;
             $roleUser->save();

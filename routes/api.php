@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users', [\App\Http\Controllers\Api\RoleUserController::class, 'store']);
         Route::patch('/users/{uuid}', [\App\Http\Controllers\Api\RoleUserController::class, 'update']);
 
-        Route::post('/assign', [\App\Http\Controllers\Api\RoleUserController::class, 'store']);
+        Route::post('/assign', [\App\Http\Controllers\Api\RoleUserController::class, 'assign']);
         Route::delete('/assign/{uuid}', [\App\Http\Controllers\Api\RoleUserController::class, 'destroy']);
 
         Route::get('/', [\App\Http\Controllers\Api\RoleController::class, 'index']);
