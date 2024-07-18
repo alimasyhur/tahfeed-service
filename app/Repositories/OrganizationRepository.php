@@ -26,59 +26,36 @@ class OrganizationRepository
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
             $model->where(function ($query) use ($qWord) {
-                $query->where('needs', 'like', "%$qWord%")
-                    ->orWhere('requirement', 'like', "%$qWord%")
-                    ->orWhere('amount', 'like', "%$qWord%")
-                    ->orWhere('price', 'like', "%$qWord%")
-                    ->orWhere('total', 'like', "%$qWord%")
-                    ->orWhere('note', 'like', "%$qWord%")
-                    ->orWhere('status', 'like', "%$qWord%");
+                $query->where('name', 'like', "%$qWord%")
+                    ->orWhere('domain', 'like', "%$qWord%")
+                    ->orWhere('email', 'like', "%$qWord%")
+                    ->orWhere('phone', 'like', "%$qWord%");
             });
         }
 
-        $needs = Arr::get($data, 'filter.needs');
-        if (!empty($needs)) {
-            $model->where('needs', 'like', "%$needs%");
+        $name = Arr::get($data, 'filter.name');
+        if (!empty($name)) {
+            $model->where('name', 'like', "%$name%");
         }
 
-        $requirement = Arr::get($data, 'filter.requirement');
-        if (!empty($requirement)) {
-            $model->where('requirement', 'like', "%$requirement%");
+        $domain = Arr::get($data, 'filter.domain');
+        if (!empty($domain)) {
+            $model->where('domain', 'like', "%$domain%");
         }
 
-        $amount = Arr::get($data, 'filter.amount');
-        if (!empty($amount)) {
-            $model->where('amount', $amount);
+        $bio = Arr::get($data, 'filter.bio');
+        if (!empty($bio)) {
+            $model->where('bio', 'like', "%$bio%");
         }
 
-        $price = Arr::get($data, 'filter.price');
-        if (!empty($price)) {
-            $model->where('price', '=', $price);
+        $address = Arr::get($data, 'filter.address');
+        if (!empty($address)) {
+            $model->where('address', 'like', "%$address%");
         }
 
-        $total = Arr::get($data, 'filter.total');
-        if (!empty($total)) {
-            $model->where('total', '=', $total);
-        }
-
-        $note = Arr::get($data, 'filter.note');
-        if (!empty($note)) {
-            $model->where('note', 'like', "%$note%");
-        }
-
-        $status = Arr::get($data, 'filter.status');
-        if (!empty($status)) {
-            $model->where('status', '=', $status);
-        }
-
-        $startDate = Arr::get($data, 'filter.start_date');
-        if (!empty($startDate)) {
-            $model->whereDate('created_at', '>=', $startDate);
-        }
-
-        $endDate = Arr::get($data, 'filter.end_date');
-        if (!empty($endDate)) {
-            $model->whereDate('created_at', '<=', $endDate);
+        $phone = Arr::get($data, 'filter.phone');
+        if (!empty($phone)) {
+            $model->where('phone', 'like', "%$phone%");
         }
 
         $createdBy = Arr::get($data, 'filter.created_by');

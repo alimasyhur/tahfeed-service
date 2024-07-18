@@ -30,8 +30,8 @@ class RoleUserRepository
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
             $model->where(function ($query) use ($qWord) {
-                $query->where('user_uuid', 'like', "%$qWord%");
-                $query->orWhere('user_uuid', 'like', "%$qWord%");
+                $query->where('users.name', 'like', "%$qWord%");
+                $query->orWhere('users.email', 'like', "%$qWord%");
             });
         }
 
