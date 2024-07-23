@@ -33,6 +33,7 @@ class GradeController extends Controller
                 'filter.name' => 'nullable|string',
                 'filter.description' => 'nullable|string',
                 'filter.period' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
