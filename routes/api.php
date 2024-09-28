@@ -64,4 +64,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/{uuid}', [\App\Http\Controllers\Api\GradeController::class, 'update']);
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\GradeController::class, 'destroy']);
     });
+
+    Route::prefix('classes')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\KelasController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\KelasController::class, 'store']);
+        Route::patch('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'update']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'destroy']);
+    });
 });
