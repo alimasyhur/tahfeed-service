@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +26,7 @@ Route::prefix('auth')->group(function() {
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\UserController::class, 'index']);
+        Route::get('/roles', [\App\Http\Controllers\Api\UserController::class, 'usersRoles']);
         Route::get('/me', [\App\Http\Controllers\Api\ProfileController::class, 'me']);
         Route::get('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'show']);
         Route::post('/profile', [\App\Http\Controllers\Api\ProfileController::class, 'store']);
@@ -65,7 +65,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\GradeController::class, 'destroy']);
     });
 
-    Route::prefix('classes')->group(function() {
+    Route::prefix('teachers')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\TeacherController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\TeacherController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\TeacherController::class, 'store']);
+        Route::patch('/{uuid}', [\App\Http\Controllers\Api\TeacherController::class, 'update']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\Api\TeacherController::class, 'destroy']);
+    });
+
+    Route::prefix('kelases')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\KelasController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Api\KelasController::class, 'store']);

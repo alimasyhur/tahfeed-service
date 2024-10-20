@@ -22,6 +22,7 @@ return new class extends Migration
             $table->tinyInteger('is_active');
             $table->tinyInteger('is_confirmed');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

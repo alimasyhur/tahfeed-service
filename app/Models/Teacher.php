@@ -4,17 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Kelas extends Model
+class Teacher extends Model
 {
-    use HasUuids, HasFactory, SoftDeletes;
+    use HasUuids, SoftDeletes;
 
-    protected $table = "kelas";
-
+    protected $table = "teachers";
     protected $primaryKey = 'uuid';
-
     protected $dates = ['deleted_at'];
 
     /**
@@ -23,10 +20,13 @@ class Kelas extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'description',
-        'teacher_uuid',
+        'user_uuid',
         'org_uuid',
-        'grade_uuid',
+        'nik',
+        'firstname',
+        'lastname',
+        'birthdate',
+        'phone',
+        'bio',
     ];
 }

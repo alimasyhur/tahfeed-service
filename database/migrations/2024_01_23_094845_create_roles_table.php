@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unique(['name']);
             $table->tinyInteger('constant_value');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

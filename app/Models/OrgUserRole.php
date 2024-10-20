@@ -5,14 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrgUserRole extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, SoftDeletes;
 
     protected $table = "orgs_users_roles";
 
     protected $primaryKey = 'uuid';
+
+    protected $dates = ['deleted_at'];
 
     /**
      * The attributes that are mass assignable.

@@ -14,7 +14,12 @@ class KelasRepository
     private function getQuery($data = null)
     {
         $model = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
-            ->select('kelas.*', 'organizations.name as org_name');
+            ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
+            ->select(
+                'kelas.*',
+                'organizations.name as org_name',
+                'grades.period as period',
+            );
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {

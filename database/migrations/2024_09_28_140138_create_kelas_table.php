@@ -19,6 +19,7 @@ return new class extends Migration
             $table->uuid('org_uuid');
             $table->uuid('grade_uuid');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

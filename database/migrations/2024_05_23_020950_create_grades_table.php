@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid('org_uuid');
             $table->integer('period');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

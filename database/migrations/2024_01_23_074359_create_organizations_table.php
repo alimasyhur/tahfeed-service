@@ -23,6 +23,7 @@ return new class extends Migration
             $table->tinyInteger('is_active');
             $table->uuid('created_by');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

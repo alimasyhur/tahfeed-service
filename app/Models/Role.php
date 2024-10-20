@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Role extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, SoftDeletes;
 
     protected $table = "roles";
 
@@ -16,6 +17,10 @@ class Role extends Model
 
     const ROLE_SUPER_ADMIN = "Super Admin";
     const ROLE_ADMIN = "Admin";
+    const ROLE_TEACHER = "Teacher";
+
+    const ACTIVE = 1;
+    const CONFIRMED = 1;
 
     /**
      * The attributes that are mass assignable.
