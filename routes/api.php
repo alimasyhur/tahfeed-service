@@ -73,6 +73,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\TeacherController::class, 'destroy']);
     });
 
+    Route::prefix('students')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\StudentController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\StudentController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\StudentController::class, 'store']);
+        Route::patch('/{uuid}', [\App\Http\Controllers\Api\StudentController::class, 'update']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\Api\StudentController::class, 'destroy']);
+    });
+
     Route::prefix('kelases')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\KelasController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'show']);

@@ -68,7 +68,18 @@ class KelasRepository
 
     public function find($uuid)
     {
-        $grade = Kelas::where('uuid', $uuid)
+        $grade = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
+            ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
+            ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
+            ->select(
+                'kelas.*',
+                'organizations.name as org_name',
+                'grades.name as grade_name',
+                'grades.period as grade_period',
+                'teachers.nik as teacher_nik',
+                'teachers.firstname as teacher_firstname',
+                'teachers.lastname as teacher_lastname',
+            )->where('kelas.uuid', $uuid)
             ->first();
 
         return $grade;

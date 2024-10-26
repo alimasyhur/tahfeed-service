@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Constants\OrganizationResponse;
-use App\Constants\TeacherResponse;
+use App\Constants\StudentResponse;
 use App\Constants\Pagination;
 use App\Constants\UserResponse;
 use App\Helpers\CommonHelper;
@@ -11,21 +11,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\RoleRepository;
-use App\Repositories\TeacherRepository;
+use App\Repositories\StudentRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class TeacherController extends Controller
+class StudentController extends Controller
 {
     protected $repository;
     protected $userRepository;
     protected $orgRepository;
     protected $roleRepository;
     public function __construct(
-        TeacherRepository $repository,
+        StudentRepository $repository,
         UserRepository $userRepository,
         OrganizationRepository $orgRepository,
         RoleRepository $roleRepository,
@@ -42,7 +42,7 @@ class TeacherController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'q' => 'nullable|string',
-                'filter.nik' => 'nullable|string',
+                'filter.nis' => 'nullable|string',
                 'filter.firstname' => 'nullable|string',
                 'filter.lastname' => 'nullable|string',
                 'filter.birthdate' => 'nullable|string',
@@ -56,13 +56,13 @@ class TeacherController extends Controller
                 'sortField' => 'nullable|string',
             ])->safe()->all();
 
-            $teacher = $this->repository->browse($validator);
+            $student = $this->repository->browse($validator);
             $totalRoles = $this->repository->count($validator);
 
             return response()->json([
-                'status' => TeacherResponse::SUCCESS,
-                'message' => TeacherResponse::SUCCESS_ALL_RETRIEVED,
-                'data' => $teacher,
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::SUCCESS_ALL_RETRIEVED,
+                'data' => $student,
                 'total' => $totalRoles,
             ]);
 
@@ -71,7 +71,7 @@ class TeacherController extends Controller
             $errCode = CommonHelper::getStatusCode($errMessage);
 
             return response()->json([
-                'status' => TeacherResponse::ERROR,
+                'status' => StudentResponse::ERROR,
                 'message' => $errMessage,
             ], $errCode);
         }
@@ -79,21 +79,21 @@ class TeacherController extends Controller
 
     public function show($uuid)
     {
-        $teacher = $this->repository->find($uuid);
+        $student = $this->repository->find($uuid);
 
-        if(empty($teacher)) {
+        if(empty($student)) {
             return response()->json([
-                'status' => TeacherResponse::SUCCESS,
-                'message' => TeacherResponse::NOT_FOUND,
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::NOT_FOUND,
                 'error' => true,
                 'data' => [],
             ], 404);
         }
 
         return response()->json([
-            'status' => TeacherResponse::SUCCESS,
-            'message' => TeacherResponse::SUCCESS_RETRIEVED,
-            'data' => $teacher,
+            'status' => StudentResponse::SUCCESS,
+            'message' => StudentResponse::SUCCESS_RETRIEVED,
+            'data' => $student,
         ]);
     }
 
@@ -103,11 +103,11 @@ class TeacherController extends Controller
             $data = $request->all();
 
             $rules = [
-                'nik' => [
+                'nis' => [
                     'required',
                     'string',
-                    'unique:teachers,org_uuid',
-                    Rule::unique('teachers')->where(function ($query) use ($request) {
+                    'unique:students,org_uuid',
+                    Rule::unique('students')->where(function ($query) use ($request) {
                         return $query->where('org_uuid', $request->org_uuid);
                     }),
                 ],
@@ -136,7 +136,7 @@ class TeacherController extends Controller
                     'string',
                 ],
                 'user_uuid' => [
-                    'required',
+                    'sometimes',
                     'string',
                 ],
             ];
@@ -158,6 +158,16 @@ class TeacherController extends Controller
             Arr::set($validator, 'org_name', $org->name);
 
             $userUuid = Arr::get($validator, 'user_uuid');
+            if ($userUuid === null) {
+                $student = $this->repository->addStudent($validator);
+
+                return response()->json([
+                    'status' => StudentResponse::SUCCESS,
+                    'message' => StudentResponse::SUCCESS_CREATED,
+                    'data' => $student,
+                ], 201);
+            }
+
             $user = $this->userRepository->find($userUuid);
             if(empty($user)) {
                 return response()->json([
@@ -167,23 +177,23 @@ class TeacherController extends Controller
                 ], 422);
             }
 
-            $role = $this->roleRepository->findByName(Role::ROLE_TEACHER);
+            $role = $this->roleRepository->findByName(Role::ROLE_STUDENT);
             Arr::set($validator, 'role_uuid', $role->uuid);
             Arr::set($validator, 'role_name', $role->name);
             Arr::set($validator, 'constant_value', $role->constant_value);
-            $teacher = $this->repository->add($validator);
+            $student = $this->repository->add($validator);
 
             return response()->json([
-                'status' => TeacherResponse::SUCCESS,
-                'message' => TeacherResponse::SUCCESS_CREATED,
-                'data' => $teacher,
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::SUCCESS_CREATED,
+                'data' => $student,
             ], 201);
         } catch (\Throwable $th) {
             $errMessage = $th->getMessage();
             $errCode = CommonHelper::getStatusCode($errMessage);
 
             return response()->json([
-                'status' => TeacherResponse::ERROR,
+                'status' => StudentResponse::ERROR,
                 'message' => $errMessage,
             ], $errCode);
         }
@@ -192,23 +202,23 @@ class TeacherController extends Controller
     public function update($uuid, Request $request)
     {
         try {
-            $teacher = $this->repository->find($uuid);
-            if (empty($teacher)) {
+            $student = $this->repository->find($uuid);
+            if (empty($student)) {
                 return response()->json([
-                    'status'  => TeacherResponse::SUCCESS,
-                    'message' => TeacherResponse::NOT_FOUND,
-                    'data'    => $teacher,
+                    'status'  => StudentResponse::SUCCESS,
+                    'message' => StudentResponse::NOT_FOUND,
+                    'data'    => $student,
                 ], 201);
             }
 
             $rules = [
-                'nik' => [
+                'nis' => [
                     'sometimes',
                     'string',
-                    'unique:teachers,org_uuid',
-                    Rule::unique('teachers')->where(function ($query) use ($request) {
+                    'unique:students,org_uuid',
+                    Rule::unique('students')->where(function ($query) use ($request) {
                         return $query->where('org_uuid', $request->org_uuid);
-                    })->ignore($teacher->uuid, 'uuid'),
+                    })->ignore($student->uuid, 'uuid'),
                 ],
                 'firstname' => [
                     'sometimes',
@@ -248,26 +258,22 @@ class TeacherController extends Controller
             $userUuid = Arr::get($validator, 'user_uuid');
             $user = $this->userRepository->find($userUuid);
             if(empty($user)) {
-                return response()->json([
-                    'status' => UserResponse::ERROR,
-                    'message' => UserResponse::NOT_FOUND,
-                    'data' => $validator,
-                ], 422);
+                Arr::set($validator, 'user_uuid', null);
             }
 
-            $teacher = $this->repository->update($uuid, $validator);
+            $student = $this->repository->update($uuid, $validator);
 
             return response()->json([
-                'status' => TeacherResponse::SUCCESS,
-                'message' => TeacherResponse::SUCCESS_UPDATED,
-                'data' => $teacher,
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::SUCCESS_UPDATED,
+                'data' => $student,
             ], 201);
         } catch (\Throwable $th) {
             $errMessage = $th->getMessage();
             $errCode = CommonHelper::getStatusCode($errMessage);
 
             return response()->json([
-                'status' => TeacherResponse::ERROR,
+                'status' => StudentResponse::ERROR,
                 'message' => $errMessage,
             ], $errCode);
         }
@@ -276,20 +282,20 @@ class TeacherController extends Controller
     public function destroy($uuid)
     {
         try {
-            $teacher = $this->repository->find($uuid);
+            $student = $this->repository->find($uuid);
 
-            $this->repository->delete($teacher);
+            $this->repository->delete($student);
 
             return response()->json([
-                'status' => TeacherResponse::SUCCESS,
-                'message' => TeacherResponse::SUCCESS_DELETED,
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::SUCCESS_DELETED,
             ]);
         } catch (\Throwable $th) {
             $errMessage = $th->getMessage();
             $errCode = CommonHelper::getStatusCode($errMessage);
 
             return response()->json([
-                'status' => TeacherResponse::ERROR,
+                'status' => StudentResponse::ERROR,
                 'message' => $errMessage,
             ], $errCode);
         }
