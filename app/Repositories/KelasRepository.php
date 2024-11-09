@@ -101,6 +101,7 @@ class KelasRepository
         $model->teacher_uuid = Arr::get($data, 'teacher_uuid');
         $model->org_uuid = Arr::get($data, 'org_uuid');
         $model->grade_uuid = Arr::get($data, 'grade_uuid');
+        $model->status = Kelas::STATUS_ACTIVE;
         $model->save();
 
         return $model;

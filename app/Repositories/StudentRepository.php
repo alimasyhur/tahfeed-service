@@ -22,13 +22,19 @@ class StudentRepository
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
             $model->where(function ($query) use ($qWord) {
-                $query->where('students.nis', 'like', "%$qWord%")
+                $query->where('students.nik', 'like', "%$qWord%")
+                    ->orWhere('students.nis', 'like', "%$qWord%")
                     ->orWhere('students.firstname', 'like', "%$qWord%")
                     ->orWhere('students.lastname', 'like', "%$qWord%")
                     ->orWhere('students.birthdate', 'like', "%$qWord%")
                     ->orWhere('students.phone', 'like', "%$qWord%")
                     ->orWhere('students.bio', 'like', "%$qWord%");
             });
+        }
+
+        $nik = Arr::get($data, 'filter.nik');
+        if (!empty($nik)) {
+            $model->where('students.nik', $nik);
         }
 
         $nis = Arr::get($data, 'filter.nis');
@@ -73,6 +79,7 @@ class StudentRepository
             $student = new Student();
             $student->user_uuid = Arr::get($data, 'user_uuid');
             $student->org_uuid = Arr::get($data, 'org_uuid');
+            $student->nik = Arr::get($data, 'nik');
             $student->nis = Arr::get($data, 'nis');
             $student->firstname = Arr::get($data, 'firstname');
             $student->lastname = Arr::get($data, 'lastname');
@@ -105,8 +112,8 @@ class StudentRepository
     public function addStudent($data)
     {
         $student = new Student();
-        $student->user_uuid = Arr::get($data, 'user_uuid');
         $student->org_uuid = Arr::get($data, 'org_uuid');
+        $student->nik = Arr::get($data, 'nik');
         $student->nis = Arr::get($data, 'nis');
         $student->firstname = Arr::get($data, 'firstname');
         $student->lastname = Arr::get($data, 'lastname');
@@ -137,5 +144,14 @@ class StudentRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    public function browseOptions($data = null)
+    {
+        $model = $this->getQuery($data);
+
+        CommonHelper::sortPageFilter($model, $data);
+
+        return $model->get();
     }
 }

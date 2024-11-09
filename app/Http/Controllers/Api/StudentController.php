@@ -42,6 +42,7 @@ class StudentController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'q' => 'nullable|string',
+                'filter.nik' => 'nullable|string',
                 'filter.nis' => 'nullable|string',
                 'filter.firstname' => 'nullable|string',
                 'filter.lastname' => 'nullable|string',
@@ -103,12 +104,22 @@ class StudentController extends Controller
             $data = $request->all();
 
             $rules = [
+                'nik' => [
+                    'required',
+                    'string',
+                    'unique:students,org_uuid',
+                    Rule::unique('students')->where(function ($query) use ($request) {
+                        return $query->where('org_uuid', $request->org_uuid)
+                            ->where('deleted_at', '!=', null);
+                    }),
+                ],
                 'nis' => [
                     'required',
                     'string',
                     'unique:students,org_uuid',
                     Rule::unique('students')->where(function ($query) use ($request) {
-                        return $query->where('org_uuid', $request->org_uuid);
+                        return $query->where('org_uuid', $request->org_uuid)
+                            ->where('deleted_at', '!=', null);
                     }),
                 ],
                 'firstname' => [
@@ -157,7 +168,7 @@ class StudentController extends Controller
             }
             Arr::set($validator, 'org_name', $org->name);
 
-            $userUuid = Arr::get($validator, 'user_uuid');
+            $userUuid = Arr::get($validator, 'user_uuid', null);
             if ($userUuid === null) {
                 $student = $this->repository->addStudent($validator);
 
@@ -212,12 +223,22 @@ class StudentController extends Controller
             }
 
             $rules = [
+                'nik' => [
+                    'sometimes',
+                    'string',
+                    'unique:students,org_uuid',
+                    Rule::unique('students')->where(function ($query) use ($request) {
+                        return $query->where('org_uuid', $request->org_uuid)
+                            ->where('deleted_at', '!=', null);
+                    })->ignore($student->uuid, 'uuid'),
+                ],
                 'nis' => [
                     'sometimes',
                     'string',
                     'unique:students,org_uuid',
                     Rule::unique('students')->where(function ($query) use ($request) {
-                        return $query->where('org_uuid', $request->org_uuid);
+                        return $query->where('org_uuid', $request->org_uuid)
+                            ->where('deleted_at', '!=', null);
                     })->ignore($student->uuid, 'uuid'),
                 ],
                 'firstname' => [
@@ -290,6 +311,37 @@ class StudentController extends Controller
                 'status' => StudentResponse::SUCCESS,
                 'message' => StudentResponse::SUCCESS_DELETED,
             ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => StudentResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function option(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $students = $this->repository->browseOptions($validator);
+
+            return response()->json([
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::SUCCESS_ALL_RETRIEVED,
+                'data' => $students,
+            ]);
+
         } catch (\Throwable $th) {
             $errMessage = $th->getMessage();
             $errCode = CommonHelper::getStatusCode($errMessage);

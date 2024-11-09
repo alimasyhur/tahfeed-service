@@ -7,21 +7,26 @@ use App\Constants\Pagination;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Repositories\KelasRepository;
+use App\Repositories\KelasStudentRepository;
 use App\Repositories\OrganizationRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
 
 class KelasController extends Controller
 {
     protected $repository;
+    protected $kelasStudentRepository;
     protected $orgRepository;
     public function __construct(
         KelasRepository $repository,
+        KelasStudentRepository $kelasStudentRepository,
         OrganizationRepository $orgRepository
     )
     {
         $this->repository = $repository;
+        $this->kelasStudentRepository = $kelasStudentRepository;
         $this->orgRepository = $orgRepository;
     }
 
@@ -207,6 +212,127 @@ class KelasController extends Controller
             $kelas = $this->repository->find($uuid);
 
             $this->repository->delete($kelas);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_DELETED,
+            ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function kelasStudent($uuid, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
+                'filter.student_uuid' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            Arr::set($validator, 'kelas_uuid', $uuid);
+
+            $kelas = $this->kelasStudentRepository->browse($validator);
+            $totalKelas = $this->kelasStudentRepository->count($validator);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_ALL_RETRIEVED,
+                'data' => $kelas,
+                'total' => $totalKelas,
+            ]);
+
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function assignStudent(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            $rules = [
+                'student_uuid' => [
+                    'required',
+                    'string',
+                ],
+                'kelas_uuid' => [
+                    'required',
+                    'string',
+                ],
+                'org_uuid' => [
+                    'required',
+                    'string',
+                ],
+                'notes' => [
+                    'sometimes',
+                    'string',
+                ],
+            ];
+
+            $customMessages = [
+                'student_uuid.unique' => 'student is already assigned to an active class',
+            ];
+
+            $validator = Validator::make($data, $rules, $customMessages);
+
+            $validator->validate();
+            $validator = $validator->safe()->all();
+
+            $isAssigned = $this->kelasStudentRepository->isActiveKelasAssigned(
+                $request->kelas_uuid,
+                $request->student_uuid,
+                $request->org_uuid);
+
+            if ($isAssigned) {
+                return response()->json([
+                    'status' => KelasResponse::ERROR,
+                    'message' => KelasResponse::ALREADY_ASSIGNED,
+                ], 422);
+            }
+
+            $kelas = $this->kelasStudentRepository->add($validator);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_CREATED,
+                'data' => $kelas,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function destroyKelasStudent($uuid)
+    {
+        try {
+            $kelas = $this->kelasStudentRepository->find($uuid);
+
+            $this->kelasStudentRepository->delete($kelas);
 
             return response()->json([
                 'status' => KelasResponse::SUCCESS,

@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('students', function (Blueprint $table) {
+
+        Schema::create('kelas_students', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->uuid('user_uuid')->nullable();
+            $table->uuid('kelas_uuid');
+            $table->uuid('student_uuid');
             $table->uuid('org_uuid');
-            $table->string('nik');
-            $table->string('nis');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->date('birthdate');
-            $table->string('phone', 50);
-            $table->string('bio');
+            $table->string('notes')->nullable();
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('students');
+        Schema::dropIfExists('kelas_students');
     }
 };

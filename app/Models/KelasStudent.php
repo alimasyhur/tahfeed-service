@@ -7,18 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Kelas extends Model
+class KelasStudent extends Model
 {
     use HasUuids, HasFactory, SoftDeletes;
 
-    protected $table = "kelas";
+    protected $table = "kelas_students";
 
     protected $primaryKey = 'uuid';
 
     protected $dates = ['deleted_at'];
 
     const STATUS_ACTIVE = 'active';
-    const STATUS_REMOVED = 'removed';
 
     /**
      * The attributes that are mass assignable.
@@ -26,11 +25,11 @@ class Kelas extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'description',
-        'teacher_uuid',
+        'kelas_uuid',
+        'student_uuid',
         'org_uuid',
-        'grade_uuid',
+        'notes',
         'status',
+        'deleted_at',
     ];
 }

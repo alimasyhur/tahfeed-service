@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid('teacher_uuid');
             $table->uuid('org_uuid');
             $table->uuid('grade_uuid');
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });

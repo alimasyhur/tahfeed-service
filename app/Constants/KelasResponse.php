@@ -16,5 +16,5 @@ class KelasResponse {
     CONST EXIST                             = 'Class is already exist';
     CONST IN_USED                           = 'Class is in used. You can`t delete it';
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
-    CONST ALREADY_ASSIGNED                  = 'User is already assigned to this Class';
+    CONST ALREADY_ASSIGNED                  = 'Student is already assigned to this Class';
 }

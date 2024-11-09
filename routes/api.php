@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('students')->group(function() {
+        Route::get('/options', [\App\Http\Controllers\Api\StudentController::class, 'option']);
         Route::get('/', [\App\Http\Controllers\Api\StudentController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\StudentController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Api\StudentController::class, 'store']);
@@ -84,8 +85,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('kelases')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\KelasController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'show']);
+        Route::get('/{uuid}/students', [\App\Http\Controllers\Api\KelasController::class, 'kelasStudent']);
+        Route::post('/assign', [\App\Http\Controllers\Api\KelasController::class, 'assignStudent']);
         Route::post('/', [\App\Http\Controllers\Api\KelasController::class, 'store']);
         Route::patch('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'update']);
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'destroy']);
+    });
+
+    Route::prefix('kelases-students')->group(function() {
+        Route::delete('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'destroyKelasStudent']);
     });
 });
