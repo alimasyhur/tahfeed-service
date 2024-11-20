@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Constants\GradeResponse;
+use App\Constants\OrganizationResponse;
 use App\Constants\Pagination;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Repositories\GradeRepository;
 use App\Repositories\OrganizationRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -113,6 +115,16 @@ class GradeController extends Controller
 
             $validator->validate();
             $validator = $validator->safe()->all();
+
+            $orgUuid = Arr::get($validator, 'org_uuid');
+            $org = $this->orgRepository->findByUUID($orgUuid);
+            if(empty($org)) {
+                return response()->json([
+                    'status' => OrganizationResponse::ERROR,
+                    'message' => OrganizationResponse::NOT_FOUND,
+                    'data' => $validator,
+                ], 422);
+            }
 
             $grade = $this->repository->add($validator);
 

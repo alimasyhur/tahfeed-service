@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('uuid')->primary();
             $table->uuid('user_uuid')->nullable();
             $table->uuid('org_uuid');
+            $table->uuid('grade_uuid');
             $table->string('nik');
             $table->string('nis');
             $table->string('firstname');

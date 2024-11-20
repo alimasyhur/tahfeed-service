@@ -22,6 +22,7 @@ class Student extends Model
     protected $fillable = [
         'user_uuid',
         'org_uuid',
+        'grade_uuid',
         'nik',
         'nis',
         'firstname',

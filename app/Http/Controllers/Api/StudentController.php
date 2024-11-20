@@ -51,6 +51,7 @@ class StudentController extends Controller
                 'filter.bio' => 'nullable|string',
                 'filter.user_uuid' => 'nullable|string',
                 'filter.org_uuid' => 'nullable|string',
+                'filter.grade_uuid' => 'nullable|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
@@ -148,6 +149,10 @@ class StudentController extends Controller
                 ],
                 'user_uuid' => [
                     'sometimes',
+                    'string',
+                ],
+                'grade_uuid' => [
+                    'required',
                     'string',
                 ],
             ];
@@ -266,6 +271,10 @@ class StudentController extends Controller
                     'string',
                 ],
                 'user_uuid' => [
+                    'sometimes',
+                    'string',
+                ],
+                'grade_uuid' => [
                     'sometimes',
                     'string',
                 ],

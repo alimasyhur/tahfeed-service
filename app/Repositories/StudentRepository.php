@@ -17,7 +17,8 @@ class StudentRepository
     private function getQuery($data = null)
     {
         $model = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
-            ->select('students.*', 'organizations.name as org_name');
+            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid')
+            ->select('students.*', 'organizations.name as org_name', 'grades.period AS grade_period');
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
@@ -28,7 +29,8 @@ class StudentRepository
                     ->orWhere('students.lastname', 'like', "%$qWord%")
                     ->orWhere('students.birthdate', 'like', "%$qWord%")
                     ->orWhere('students.phone', 'like', "%$qWord%")
-                    ->orWhere('students.bio', 'like', "%$qWord%");
+                    ->orWhere('students.bio', 'like', "%$qWord%")
+                    ->orWhere('grades.period', 'like', "%$qWord%");
             });
         }
 
@@ -50,6 +52,11 @@ class StudentRepository
         $orgUUID = Arr::get($data, 'filter.org_uuid');
         if (!empty($orgUUID)) {
             $model->where('students.org_uuid', $orgUUID);
+        }
+
+        $gradeUUID = Arr::get($data, 'filter.grade_uuid');
+        if (!empty($gradeUUID)) {
+            $model->where('students.grade_uuid', $gradeUUID);
         }
 
         return $model;
@@ -79,6 +86,7 @@ class StudentRepository
             $student = new Student();
             $student->user_uuid = Arr::get($data, 'user_uuid');
             $student->org_uuid = Arr::get($data, 'org_uuid');
+            $student->grade_uuid = Arr::get($data, 'grade_uuid');
             $student->nik = Arr::get($data, 'nik');
             $student->nis = Arr::get($data, 'nis');
             $student->firstname = Arr::get($data, 'firstname');
@@ -113,6 +121,7 @@ class StudentRepository
     {
         $student = new Student();
         $student->org_uuid = Arr::get($data, 'org_uuid');
+        $student->grade_uuid = Arr::get($data, 'grade_uuid');
         $student->nik = Arr::get($data, 'nik');
         $student->nis = Arr::get($data, 'nis');
         $student->firstname = Arr::get($data, 'firstname');
