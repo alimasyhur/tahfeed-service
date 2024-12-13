@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\CommonHelper;
 use App\Models\Kelas;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 class KelasRepository
@@ -40,17 +41,17 @@ class KelasRepository
         }
 
         $teacherUuid = Arr::get($data, 'filter.teacher_uuid');
-        if (!empty($orgUuid)) {
-            $model->where('kelas.teacher_uuid', '=', "$teacherUuid");
+        if (!empty($teacherUuid)) {
+            $model->where('kelas.teacher_uuid', $teacherUuid);
         }
 
         $orgUuid = Arr::get($data, 'filter.org_uuid');
         if (!empty($orgUuid)) {
-            $model->where('kelas.org_uuid', '=', "$orgUuid");
+            $model->where('kelas.org_uuid', $orgUuid);
         }
 
         $gradeUuid = Arr::get($data, 'filter.grade_uuid');
-        if (!empty($orgUuid)) {
+        if (!empty($gradeUuid)) {
             $model->where('kelas.grade_uuid', '=', "$gradeUuid");
         }
 
@@ -101,7 +102,8 @@ class KelasRepository
         $model->teacher_uuid = Arr::get($data, 'teacher_uuid');
         $model->org_uuid = Arr::get($data, 'org_uuid');
         $model->grade_uuid = Arr::get($data, 'grade_uuid');
-        $model->status = Kelas::STATUS_ACTIVE;
+        $model->status = Kelas::STATUS_NOT_STARTED;
+        $model->total_juz_target = Arr::get($data, 'total_juz_target');
         $model->save();
 
         return $model;
@@ -109,12 +111,40 @@ class KelasRepository
 
     public function update($uuid, $data)
     {
-
         $model = Kelas::findOrFail($uuid);
         $model->update($data);
 
-        $model->fresh();
-        return $model;
+        return $model->fresh();
+    }
+
+    public function activate($uuid)
+    {
+        $model = Kelas::findOrFail($uuid);
+        $model->start_date = Carbon::now();
+        $model->status = Kelas::STATUS_ACTIVE;
+        $model->update();
+
+        return $model->fresh();
+    }
+
+    public function stop($uuid)
+    {
+        $model = Kelas::findOrFail($uuid);
+        $model->end_date = Carbon::now();
+        $model->status = Kelas::STATUS_FINISHED;
+        $model->update();
+
+        return $model->fresh();
+    }
+
+    public function reactivate($uuid)
+    {
+        $model = Kelas::findOrFail($uuid);
+        $model->end_date = null;
+        $model->status = Kelas::STATUS_ACTIVE;
+        $model->update();
+
+        return $model->fresh();
     }
 
     public function delete(Kelas $grade)
@@ -126,5 +156,15 @@ class KelasRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    public function hasActiveByTeacherOrg($teacherUUID, $orgUUID)
+    {
+        $kelas = Kelas::where('teacher_uuid', $teacherUUID)
+            ->where('org_uuid', $orgUUID)
+            ->whereIn('status', [Kelas::STATUS_NOT_STARTED, Kelas::STATUS_ACTIVE])
+            ->count();
+
+        return $kelas > 0;
     }
 }

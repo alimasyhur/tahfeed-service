@@ -7,20 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Kelas extends Model
+class TemplateQuran extends Model
 {
     use HasUuids, HasFactory, SoftDeletes;
 
-    protected $table = "kelas";
+    protected $table = "template_qurans";
 
     protected $primaryKey = 'uuid';
 
-    protected $dates = ['deleted_at'];
-
-    const STATUS_NOT_STARTED = 'not_started';
-    const STATUS_ACTIVE = 'active';
-    const STATUS_REMOVED = 'removed';
-    const STATUS_FINISHED = 'finished';
+    const PER_HALAMAN = 'per_halaman';
 
     /**
      * The attributes that are mass assignable.
@@ -30,12 +25,6 @@ class Kelas extends Model
     protected $fillable = [
         'name',
         'description',
-        'teacher_uuid',
-        'org_uuid',
-        'grade_uuid',
-        'status',
-        'total_juz_target',
-        'start_date',
-        'end_date',
+        'slug',
     ];
 }

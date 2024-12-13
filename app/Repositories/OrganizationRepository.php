@@ -8,15 +8,21 @@ use App\Helpers\CommonHelper;
 use App\Models\Organization;
 use App\Models\OrgUserRole;
 use App\Models\Role;
+use App\Models\TemplateQuran;
+use App\Models\TemplateQuranOrg;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class OrganizationRepository
 {
     protected $roleRepository;
-    function __construct(RoleRepository $roleRepository
+    protected $templateQuranRepository;
+    function __construct(
+        RoleRepository $roleRepository,
+        TemplateQuranRepository $templateQuranRepository,
     ) {
         $this->roleRepository = $roleRepository;
+        $this->templateQuranRepository = $templateQuranRepository;
     }
 
     private function getQuery($data = null)
@@ -180,6 +186,14 @@ class OrganizationRepository
             $roleUser->is_active = RoleUserStatus::ACTIVE;
             $roleUser->is_confirmed = RoleUserStatus::VERIFIED;
             $roleUser->save();
+
+            $templateQuran = $this->templateQuranRepository->findBySlug(TemplateQuran::PER_HALAMAN);
+
+            $quranTemplate = new TemplateQuranOrg();
+            $quranTemplate->name = $templateQuran->description;
+            $quranTemplate->template_quran_uuid = $templateQuran->uuid;
+            $quranTemplate->org_uuid = $model->uuid;
+            $quranTemplate->save();
 
             DB::commit();
 

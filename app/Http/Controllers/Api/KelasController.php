@@ -99,7 +99,8 @@ class KelasController extends Controller
                     'unique:kelas,org_uuid',
                     Rule::unique('kelas')->where(function ($query) use ($request) {
                         return $query->where('org_uuid', $request->org_uuid)
-                                    ->where('grade_uuid', $request->grade_uuid);
+                                    ->where('grade_uuid', $request->grade_uuid)
+                                    ->where('deleted_at', null);
                     }),
                 ],
                 'description' => [
@@ -118,12 +119,26 @@ class KelasController extends Controller
                     'required',
                     'string',
                 ],
+                'total_juz_target' => [
+                    'required',
+                    'integer',
+                ],
             ];
 
             $validator = Validator::make($data, $rules);
 
             $validator->validate();
             $validator = $validator->safe()->all();
+
+            $hasActive = $this->repository
+                ->hasActiveByTeacherOrg(Arr::get($validator, 'teacher_uuid'), Arr::get($validator, 'org_uuid'));
+
+            if($hasActive) {
+                return response()->json([
+                    'status' => KelasResponse::ERROR,
+                    'message' => KelasResponse::HAS_ACTIVE_CLASS,
+                ], 422);
+            }
 
             $kelas = $this->repository->add($validator);
 
@@ -166,7 +181,7 @@ class KelasController extends Controller
                     })->ignore($kelas->uuid, 'uuid'),
                 ],
                 'description' => [
-                    'required',
+                    'sometimes',
                     'string',
                 ],
                 'teacher_uuid' => [
@@ -180,6 +195,10 @@ class KelasController extends Controller
                 'grade_uuid' => [
                     'sometimes',
                     'string',
+                ],
+                'total_juz_target' => [
+                    'sometimes',
+                    'integer',
                 ],
             ];
 
@@ -206,11 +225,107 @@ class KelasController extends Controller
         }
     }
 
-    public function destroy($uuid)
+    public function activate($uuid)
     {
         try {
             $kelas = $this->repository->find($uuid);
+            if (empty($kelas)) {
+                return response()->json([
+                    'status'  => KelasResponse::SUCCESS,
+                    'message' => KelasResponse::NOT_FOUND,
+                    'data'    => $kelas,
+                ], 201);
+            }
 
+            $kelas = $this->repository->activate($uuid);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_UPDATED,
+                'data' => $kelas,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function stop($uuid)
+    {
+        try {
+            $kelas = $this->repository->find($uuid);
+            if (empty($kelas)) {
+                return response()->json([
+                    'status'  => KelasResponse::SUCCESS,
+                    'message' => KelasResponse::NOT_FOUND,
+                    'data'    => $kelas,
+                ], 201);
+            }
+
+            $kelas = $this->repository->stop($uuid);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_UPDATED,
+                'data' => $kelas,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function reactivate($uuid)
+    {
+        try {
+            $kelas = $this->repository->find($uuid);
+            if (empty($kelas)) {
+                return response()->json([
+                    'status'  => KelasResponse::SUCCESS,
+                    'message' => KelasResponse::NOT_FOUND,
+                    'data'    => $kelas,
+                ], 201);
+            }
+
+            $kelas = $this->repository->reactivate($uuid);
+
+            return response()->json([
+                'status' => KelasResponse::SUCCESS,
+                'message' => KelasResponse::SUCCESS_UPDATED,
+                'data' => $kelas,
+            ], 201);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => KelasResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function destroy($uuid)
+    {
+        try {
+            if ($this->kelasStudentRepository->hasActiveStudent($uuid)) {
+                return response()->json([
+                    'status' => KelasResponse::ERROR,
+                    'message' => KelasResponse::HAS_ACTIVE_STUDENT,
+                ]);
+            }
+
+            $kelas = $this->repository->find($uuid);
             $this->repository->delete($kelas);
 
             return response()->json([
@@ -241,7 +356,7 @@ class KelasController extends Controller
                 'sortField' => 'nullable|string',
             ])->safe()->all();
 
-            Arr::set($validator, 'kelas_uuid', $uuid);
+            Arr::set($validator, 'filter.kelas_uuid', $uuid);
 
             $kelas = $this->kelasStudentRepository->browse($validator);
             $totalKelas = $this->kelasStudentRepository->count($validator);

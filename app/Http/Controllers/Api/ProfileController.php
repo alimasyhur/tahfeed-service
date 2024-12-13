@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\ProfileRepository;
 use App\Repositories\RoleUserRepository;
+use App\Repositories\TemplateQuranOrgRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
@@ -17,16 +18,19 @@ class ProfileController extends Controller
     protected $repository;
     protected $orgRepository;
     protected $roleRepository;
+    protected $quranOrgRepository;
 
     public function __construct(
         ProfileRepository $repository,
         OrganizationRepository $orgRepository,
         RoleUserRepository $roleRepository,
+        TemplateQuranOrgRepository $quranOrgRepository,
     )
     {
         $this->repository = $repository;
         $this->orgRepository = $orgRepository;
         $this->roleRepository = $roleRepository;
+        $this->quranOrgRepository = $quranOrgRepository;
     }
 
     public function show(Request $request)
@@ -149,6 +153,8 @@ class ProfileController extends Controller
         $roles = $this->roleRepository->browse($rolesFilter);
         $orgUuid = Arr::get($roles, '0.org_uuid');
         $organization = $this->orgRepository->findByUUID($orgUuid);
+        $orgFilter = ['filter' => ['org_uuid' => $orgUuid]];
+        $quranOrg = $this->quranOrgRepository->browse($orgFilter);
 
         return response()->json([
             'status' => ProfileResponse::SUCCESS,
@@ -158,6 +164,7 @@ class ProfileController extends Controller
                 'profile' => $profile,
                 'organization' => $organization,
                 'roles' => $roles,
+                'qurans' => $quranOrg,
             ],
         ]);
     }

@@ -88,11 +88,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{uuid}/students', [\App\Http\Controllers\Api\KelasController::class, 'kelasStudent']);
         Route::post('/assign', [\App\Http\Controllers\Api\KelasController::class, 'assignStudent']);
         Route::post('/', [\App\Http\Controllers\Api\KelasController::class, 'store']);
+        Route::patch('/{uuid}/activate', [\App\Http\Controllers\Api\KelasController::class, 'activate']);
+        Route::patch('/{uuid}/stop', [\App\Http\Controllers\Api\KelasController::class, 'stop']);
+        Route::patch('/{uuid}/reactivate', [\App\Http\Controllers\Api\KelasController::class, 'reactivate']);
         Route::patch('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'update']);
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'destroy']);
     });
 
     Route::prefix('kelases-students')->group(function() {
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\KelasController::class, 'destroyKelasStudent']);
+    });
+
+    Route::prefix('template-qurans')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\TemplateQuranController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\TemplateQuranController::class, 'show']);
     });
 });

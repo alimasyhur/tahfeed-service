@@ -11,17 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelas', function (Blueprint $table) {
+        Schema::create('template_quran_pages', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('description');
-            $table->uuid('teacher_uuid');
-            $table->uuid('org_uuid');
-            $table->uuid('grade_uuid');
-            $table->string('status');
-            $table->integer('total_juz_target');
-            $table->timestamp('start_date')->nullable();
-            $table->timestamp('end_date')->nullable();
+            $table->integer('constant');
+            $table->uuid('template_quran_uuid');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -32,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelas');
+        Schema::dropIfExists('template_quran_pages');
     }
 };

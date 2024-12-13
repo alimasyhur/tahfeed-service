@@ -21,10 +21,12 @@ class RoleUserRepository
     private function getQuery($data = null)
     {
         $model = OrgUserRole::join('users', 'orgs_users_roles.user_uuid', '=', 'users.uuid')
+            ->leftJoin('teachers', 'orgs_users_roles.user_uuid', '=', 'teachers.user_uuid')
             ->select(
                 'orgs_users_roles.*',
                 'users.name as user_name',
-                'users.email as email'
+                'users.email as email',
+                'teachers.uuid as teacher_uuid',
             );
 
         $qWord = Arr::get($data, 'q');
@@ -47,7 +49,7 @@ class RoleUserRepository
 
         $userUuid = Arr::get($data, 'filter.user_uuid');
         if (!empty($userUuid)) {
-            $model->where('user_uuid', '=', $userUuid);
+            $model->where('orgs_users_roles.user_uuid', '=', $userUuid);
         }
 
         $orgUuid = Arr::get($data, 'filter.org_uuid');

@@ -124,4 +124,13 @@ class KelasStudentRepository
 
         return $kelasStudent !== 0;
     }
+
+    public function hasActiveStudent($kelasUUID) {
+        $kelasStudent = KelasStudent::where('kelas_uuid', $kelasUUID)
+            ->where('status', Kelas::STATUS_ACTIVE)
+            ->where('deleted_at', null)
+            ->count();
+
+        return $kelasStudent !== 0;
+    }
 }
