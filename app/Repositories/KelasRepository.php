@@ -69,7 +69,7 @@ class KelasRepository
 
     public function find($uuid)
     {
-        $grade = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
+        $kelas = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
             ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
             ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
             ->select(
@@ -83,7 +83,7 @@ class KelasRepository
             )->where('kelas.uuid', $uuid)
             ->first();
 
-        return $grade;
+        return $kelas;
     }
 
     public function findByName($name)

@@ -103,4 +103,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\TemplateQuranController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\TemplateQuranController::class, 'show']);
     });
+
+    Route::prefix('reports')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\ReportController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'show']);
+        Route::patch('/{uuid}/lock', [\App\Http\Controllers\Api\ReportController::class, 'lock']);
+        Route::patch('/{uuid}/unlock', [\App\Http\Controllers\Api\ReportController::class, 'unlock']);
+        Route::patch('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'update']);
+        Route::post('/', [\App\Http\Controllers\Api\ReportController::class, 'store']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'destroy']);
+    });
 });
