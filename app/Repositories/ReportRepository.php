@@ -22,7 +22,19 @@ class ReportRepository
 
     private function getQuery($data = null)
     {
-        $model = Report::query();
+        $model = Report::join('students', 'reports.student_uuid', '=', 'students.uuid')
+        ->join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
+        ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
+        ->select(
+            'reports.*',
+            'students.nis as student_nis',
+            DB::raw("CONCAT(students.firstname, ' ', students.lastname) as student_fullname"),
+            'students.firstname as student_firstname',
+            'students.lastname as student_lastname',
+            'start_juz_pages.description as start_juz_page_name',
+            'end_juz_pages.description as end_juz_page_name',
+            DB::raw("CONCAT((end_juz_pages.value - start_juz_pages.value) + 1, ' Halaman') as total"),
+        );
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {

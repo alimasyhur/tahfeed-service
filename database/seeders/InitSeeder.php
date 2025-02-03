@@ -34,7 +34,7 @@ class InitSeeder extends Seeder
             $templateQuranJuz = [
                 'uuid' => Str::uuid(),
                 'name' => 'Juz ' . $juz,
-                'description' => 'Al-Quran Juz ' . $juz,
+                'description' => 'Juz ' . $juz,
                 'constant' => $juz,
                 'created_at' => $dateNow,
                 'updated_at' => $dateNow,

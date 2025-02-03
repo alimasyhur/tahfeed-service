@@ -34,4 +34,14 @@ class JuzPageRepository
 
         return $juzPage;
     }
+
+    public function findByJuzPageUUID($juzUUID, $pageUUID)
+    {
+        $role = TemplateQuranJuzPage::where('template_quran_juz_uuid', $juzUUID)
+            ->where('template_quran_page_uuid', $pageUUID)
+            ->first();
+
+        return $role;
+    }
+
 }

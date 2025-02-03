@@ -104,6 +104,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{uuid}', [\App\Http\Controllers\Api\TemplateQuranController::class, 'show']);
     });
 
+    Route::prefix('template-quran-juzes')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\TemplateQuranJuzController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\TemplateQuranJuzController::class, 'show']);
+    });
+
+    Route::prefix('template-quran-pages')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\TemplateQuranPageController::class, 'index']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\TemplateQuranPageController::class, 'show']);
+    });
+
     Route::prefix('reports')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\ReportController::class, 'index']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'show']);
