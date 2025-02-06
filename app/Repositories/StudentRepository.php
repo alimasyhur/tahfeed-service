@@ -17,8 +17,24 @@ class StudentRepository
     private function getQuery($data = null)
     {
         $model = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
-            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid')
-            ->select('students.*', 'organizations.name as org_name', 'grades.period AS grade_period');
+            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid');
+
+        $model->select(
+            'students.*',
+            'organizations.name as org_name',
+            'grades.period AS grade_period',
+        );
+
+        $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
+        if (!empty($kelasUUID)) {
+            $model->join('kelas_students', 'students.uuid', '=', 'kelas_students.student_uuid')
+                ->select(
+                    'students.*',
+                    'organizations.name as org_name',
+                    'grades.period AS grade_period',
+                    'kelas_students.kelas_uuid AS student_kelas_uuid',
+                );
+        }
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
@@ -57,6 +73,11 @@ class StudentRepository
         $gradeUUID = Arr::get($data, 'filter.grade_uuid');
         if (!empty($gradeUUID)) {
             $model->where('students.grade_uuid', $gradeUUID);
+        }
+
+        if (!empty($kelasUUID)) {
+            $model->where('kelas_students.kelas_uuid', $kelasUUID)
+                ->where('kelas_students.deleted_at', null);
         }
 
         return $model;

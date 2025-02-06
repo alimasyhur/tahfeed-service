@@ -148,14 +148,6 @@ class ReportController extends Controller
                     'required',
                     'string',
                 ],
-                'name' => [
-                    'required',
-                    'string',
-                ],
-                'description' => [
-                    'required',
-                    'string',
-                ],
                 'type_report' => [
                     'required',
                     'string',
@@ -235,7 +227,6 @@ class ReportController extends Controller
             }
             Arr::set($validator, 'end_juz_page_uuid', $endJuzPage->uuid);
 
-
             if ($startJuzPage->value > $endJuzPage->value) {
                 return response()->json([
                     'status' => JuzPageResponse::ERROR,
@@ -243,6 +234,10 @@ class ReportController extends Controller
                     'data' => $validator,
                 ], 422);
             }
+
+            $name = $startJuzPage->description . ' - ' . $endJuzPage->description;
+            Arr::set($validator, 'name', $name);
+            Arr::set($validator, 'description', $name);
 
             $report = $this->repository->add($validator);
 

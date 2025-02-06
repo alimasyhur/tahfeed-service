@@ -86,6 +86,22 @@ class KelasRepository
         return $kelas;
     }
 
+    public function findActiveKelasByUserUUID($userUUID)
+    {
+        $kelas = Kelas::join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
+            ->select(
+                'kelas.*',
+                'teachers.user_uuid as teacher_user_uuid',
+                'teachers.nik as teacher_nik',
+                'teachers.firstname as teacher_firstname',
+                'teachers.lastname as teacher_lastname',
+            )->where('teachers.user_uuid', $userUUID)
+            ->where('kelas.status', Kelas::STATUS_ACTIVE)
+            ->first();
+
+        return $kelas;
+    }
+
     public function findByName($name)
     {
         $grade = Kelas::where('name', $name)

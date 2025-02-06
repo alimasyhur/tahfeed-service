@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Constants\ProfileResponse;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
+use App\Repositories\KelasRepository;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\ProfileRepository;
 use App\Repositories\RoleUserRepository;
@@ -19,18 +20,21 @@ class ProfileController extends Controller
     protected $orgRepository;
     protected $roleRepository;
     protected $quranOrgRepository;
+    protected $kelasRepository;
 
     public function __construct(
         ProfileRepository $repository,
         OrganizationRepository $orgRepository,
         RoleUserRepository $roleRepository,
         TemplateQuranOrgRepository $quranOrgRepository,
+        KelasRepository $kelasRepository,
     )
     {
         $this->repository = $repository;
         $this->orgRepository = $orgRepository;
         $this->roleRepository = $roleRepository;
         $this->quranOrgRepository = $quranOrgRepository;
+        $this->kelasRepository = $kelasRepository;
     }
 
     public function show(Request $request)
@@ -155,6 +159,7 @@ class ProfileController extends Controller
         $organization = $this->orgRepository->findByUUID($orgUuid);
         $orgFilter = ['filter' => ['org_uuid' => $orgUuid]];
         $quranOrg = $this->quranOrgRepository->browse($orgFilter);
+        $kelas = $this->kelasRepository->findActiveKelasByUserUUID($userUuid);
 
         return response()->json([
             'status' => ProfileResponse::SUCCESS,
@@ -165,6 +170,7 @@ class ProfileController extends Controller
                 'organization' => $organization,
                 'roles' => $roles,
                 'qurans' => $quranOrg,
+                'kelas' => $kelas,
             ],
         ]);
     }
