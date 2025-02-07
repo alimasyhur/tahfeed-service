@@ -3,10 +3,9 @@
 namespace App\Helpers;
 
 use App\Constants\Sorting;
-use App\Models\Spo;
-use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class CommonHelper
 {
@@ -33,6 +32,21 @@ class CommonHelper
             $query->orderBy($q_params['sortField'], Sorting::ORDER_OPTIONS[$q_params['sortOrder']]);
         } else {
             $query->orderBy('created_at', 'asc');
+        }
+    }
+
+    public static function sortPageFilterRaw(QueryBuilder $query, $q_params = null) {
+        $limit = 10;
+        if (isset($q_params['limit'])) {
+            $limit = $q_params['limit'];
+            $query->limit($limit);
+        }
+
+        if (isset($q_params['page'])) {
+            if (!isset($q_params['limit'])) {
+                $query->limit($limit);
+            }
+            $query->offset(CommonHelper::getOffset($q_params['page'], $limit));
         }
     }
 

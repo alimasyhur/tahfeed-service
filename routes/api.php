@@ -123,4 +123,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\ReportController::class, 'store']);
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'destroy']);
     });
+
+    Route::prefix('achievements')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\SummaryController::class, 'index']);
+    });
 });
