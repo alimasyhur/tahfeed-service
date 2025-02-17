@@ -54,7 +54,7 @@ class RoleUserRepository
 
         $orgUuid = Arr::get($data, 'filter.org_uuid');
         if (!empty($orgUuid)) {
-            $model->where('org_uuid', '=', $orgUuid);
+            $model->where('orgs_users_roles.org_uuid', '=', $orgUuid);
         }
 
         return $model;
