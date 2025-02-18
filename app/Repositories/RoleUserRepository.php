@@ -83,8 +83,38 @@ class RoleUserRepository
                 $model->is_confirmed_label = 'not confirmed';
                 $model->is_confirmed_label_color = 'warning';
             }
+        });
 
+        return $response;
+    }
 
+    public function browseList($data = null)
+    {
+        $model = $this->getQuery($data);
+        $superdminConstant = Arr::get($data, 'filter.constant_value');
+        if (!empty($superdminConstant) && Role::ROLE_SUPER_ADMIN_CONSTANT !== $superdminConstant) {
+            $model->where('orgs_users_roles.constant_value', '!=', Role::ROLE_SUPER_ADMIN_CONSTANT);
+        }
+
+        CommonHelper::sortPageFilter($model, $data);
+
+        $response = $model->get();
+        $response->map(function($model){
+            if ($model->is_active == 1) {
+                $model->is_active_label = 'active';
+                $model->is_active_label_color = 'info';
+            } else {
+                $model->is_active_label = 'not active';
+                $model->is_active_label_color = 'warning';
+            }
+
+            if ($model->is_confirmed == 1) {
+                $model->is_confirmed_label = 'confirmed';
+                $model->is_confirmed_label_color = 'info';
+            } else {
+                $model->is_confirmed_label = 'not confirmed';
+                $model->is_confirmed_label_color = 'warning';
+            }
         });
 
         return $response;

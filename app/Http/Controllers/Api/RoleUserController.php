@@ -44,13 +44,14 @@ class RoleUserController extends Controller
                 'q' => 'nullable|string',
                 'filter.name' => 'nullable|string',
                 'filter.org_uuid' => 'nullable|string',
+                'filter.constant_value' => 'nullable|integer',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
                 'sortField' => 'nullable|string',
             ])->safe()->all();
 
-            $roles = $this->repository->browse($validator);
+            $roles = $this->repository->browseList($validator);
             $totalRoles = $this->repository->count($validator);
 
             return response()->json([

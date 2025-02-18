@@ -114,8 +114,7 @@ class OrganizationRepository
             return $organization;
         }
 
-        $organization = Organization::where('created_by', $userUuid)
-            ->where('uuid', $uuid)
+        $organization = Organization::where('uuid', $uuid)
             ->first();
 
         return $organization;

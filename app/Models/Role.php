@@ -23,6 +23,8 @@ class Role extends Model
     const ACTIVE = 1;
     const CONFIRMED = 1;
 
+    const ROLE_SUPER_ADMIN_CONSTANT = 1;
+
     /**
      * The attributes that are mass assignable.
      *
