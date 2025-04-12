@@ -32,13 +32,14 @@ class SummaryRepository
                 'o.name as organization_name',
                 DB::raw("
                 CASE
-                    WHEN COUNT(DISTINCT rh.juz_page_uuid) < 20 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid), ' Lembar')
-                    WHEN COUNT(DISTINCT rh.juz_page_uuid) % 20 = 0 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid) / 20, ' Juz')
-                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) / 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Lembar')
-                END as total
+                    WHEN COUNT(DISTINCT rh.juz_page_uuid) < 20 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid), ' Halaman')
+                    WHEN COUNT(DISTINCT rh.juz_page_uuid) % 20 = 0 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz')
+                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Lembar')
+                END AS total
             "))
             ->where('rh.org_uuid', $orgUUID)
             ->where('rh.deleted_at', null)
+            ->where('o.deleted_at', null)
             ->groupBy('s.uuid', 'g.uuid', 'o.uuid')
             ->orderBy('s.firstname');
 
