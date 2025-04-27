@@ -53,28 +53,28 @@ class SummaryRepository
                 DB::raw("'$startOfWeekLabel - $endOfWeekLabel' as pekan_ini_label"),
                 DB::raw("
                     CASE
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) < 20
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END), ' Halaman')
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20 = 0
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) < 20
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END), ' Halaman')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20 = 0
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
                         ELSE CONCAT(
-                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
-                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
                             ' Lembar'
                         )
                     END AS z_total_pekan_ini
             "),
                 DB::raw("
                     CASE
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) < 20
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END), ' Halaman')
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20 = 0
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) < 20
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END), ' Halaman')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20 = 0
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
                         ELSE CONCAT(
-                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
-                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
                             ' Lembar'
                         )
                     END AS m_total_pekan_ini
@@ -82,28 +82,28 @@ class SummaryRepository
                 DB::raw("'$startOfLastWeekLabel - $endOfLastWeekLabel' as pekan_lalu_label"),
                 DB::raw("
                     CASE
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) < 20
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END), ' Halaman')
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20 = 0
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) < 20
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END), ' Halaman')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20 = 0
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
                         ELSE CONCAT(
-                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
-                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
                             ' Lembar'
                         )
                     END AS z_total_pekan_lalu
             "),
                 DB::raw("
                     CASE
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) < 20
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END), ' Halaman')
-                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20 = 0
-                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) < 20
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END), ' Halaman')
+                        WHEN COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20 = 0
+                            THEN CONCAT(COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20, ' Juz')
                         ELSE CONCAT(
-                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
-                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.created_at BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
+                            COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
                             ' Lembar'
                         )
                     END AS m_total_pekan_lalu
