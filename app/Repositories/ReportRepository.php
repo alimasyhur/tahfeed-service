@@ -63,7 +63,7 @@ class ReportRepository
 
         $orgUUID = Arr::get($data, 'filter.org_uuid');
         if (!empty($orgUUID)) {
-            $model->where('org_uuid', '=', "$orgUUID");
+            $model->where('reports.org_uuid', '=', "$orgUUID");
         }
 
         $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
@@ -73,7 +73,7 @@ class ReportRepository
 
         $teacherUUID = Arr::get($data, 'filter.teacher_uuid');
         if (!empty($teacherUUID)) {
-            $model->where('teacher_uuid', '=', "$teacherUUID");
+            $model->where('reports.teacher_uuid', '=', "$teacherUUID");
         }
 
         $startJuzPageUUID = Arr::get($data, 'filter.start_juz_page_uuid');

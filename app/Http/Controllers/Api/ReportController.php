@@ -51,6 +51,8 @@ class ReportController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'q' => 'nullable|string',
+                'filter.teacher_uuid' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
