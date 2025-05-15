@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\StudentRepository;
+use App\Repositories\SummaryRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -24,17 +25,20 @@ class StudentController extends Controller
     protected $userRepository;
     protected $orgRepository;
     protected $roleRepository;
+    protected $summaryRepository;
     public function __construct(
         StudentRepository $repository,
         UserRepository $userRepository,
         OrganizationRepository $orgRepository,
         RoleRepository $roleRepository,
+        SummaryRepository $summaryRepository,
     )
     {
         $this->repository = $repository;
         $this->userRepository = $userRepository;
         $this->orgRepository = $orgRepository;
         $this->roleRepository = $roleRepository;
+        $this->summaryRepository = $summaryRepository;
     }
 
     public function index(Request $request)
@@ -92,10 +96,18 @@ class StudentController extends Controller
             ], 404);
         }
 
+        $filterSummary = [
+            'filter' => [
+                'student_uuid' => $student->uuid,
+            ],
+        ];
+        $summary = $this->summaryRepository->summary($filterSummary);
         return response()->json([
             'status' => StudentResponse::SUCCESS,
             'message' => StudentResponse::SUCCESS_RETRIEVED,
-            'data' => $student,
+            'data' => [
+                'student' => $summary,
+            ],
         ]);
     }
 

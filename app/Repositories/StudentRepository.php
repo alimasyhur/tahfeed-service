@@ -94,7 +94,10 @@ class StudentRepository
 
     public function find($uuid)
     {
-        $profile = Student::where('uuid', $uuid)
+        $profile = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
+            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid')
+            ->where('students.uuid', $uuid)
+            ->select('students.*', 'organizations.name AS org_name', 'grades.name AS grade_name')
             ->first();
 
         return $profile;
