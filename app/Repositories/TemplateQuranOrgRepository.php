@@ -54,7 +54,7 @@ class TemplateQuranOrgRepository
         }
 
         $orgUUID = Arr::get($data, 'filter.org_uuid');
-        if (!empty($slug)) {
+        if (!empty($orgUUID)) {
             $model->where('template_quran_organizations.org_uuid', $orgUUID);
         }
 

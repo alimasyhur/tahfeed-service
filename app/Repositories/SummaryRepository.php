@@ -47,7 +47,7 @@ class SummaryRepository
                 CASE
                     WHEN COUNT(DISTINCT rh.juz_page_uuid) < 20 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid), ' Halaman')
                     WHEN COUNT(DISTINCT rh.juz_page_uuid) % 20 = 0 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz')
-                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Lembar')
+                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Halaman')
                 END AS total
             "),
                 DB::raw("'$startOfWeekLabel - $endOfWeekLabel' as pekan_ini_label"),
@@ -61,7 +61,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS z_total_pekan_ini
             "),
@@ -75,7 +75,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS m_total_pekan_ini
             "),
@@ -90,7 +90,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS z_total_pekan_lalu
             "),
@@ -104,7 +104,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS m_total_pekan_lalu
             "),
@@ -158,7 +158,7 @@ class SummaryRepository
                 CASE
                     WHEN COUNT(DISTINCT rh.juz_page_uuid) < 20 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid), ' Halaman')
                     WHEN COUNT(DISTINCT rh.juz_page_uuid) % 20 = 0 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz')
-                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Lembar')
+                    ELSE CONCAT(COUNT(DISTINCT rh.juz_page_uuid) DIV 20, ' Juz ', COUNT(DISTINCT rh.juz_page_uuid) % 20, ' Halaman')
                 END AS total
             "),
                 DB::raw("'$startOfWeekLabel - $endOfWeekLabel' as pekan_ini_label"),
@@ -172,7 +172,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS z_total_pekan_ini
             "),
@@ -186,7 +186,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfWeek' AND '$endOfWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS m_total_pekan_ini
             "),
@@ -201,7 +201,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='ziyadah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS z_total_pekan_lalu
             "),
@@ -215,7 +215,7 @@ class SummaryRepository
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) DIV 20,
                             ' Juz ',
                             COUNT(DISTINCT CASE WHEN rh.type_report='murojaah' AND rh.date_input BETWEEN '$startOfLastWeek' AND '$endOfLastWeek' THEN rh.juz_page_uuid END) % 20,
-                            ' Lembar'
+                            ' Halaman'
                         )
                     END AS m_total_pekan_lalu
             "),

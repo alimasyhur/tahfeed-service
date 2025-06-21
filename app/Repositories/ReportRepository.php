@@ -33,7 +33,13 @@ class ReportRepository
             'students.lastname as student_lastname',
             'start_juz_pages.description as start_juz_page_name',
             'end_juz_pages.description as end_juz_page_name',
-            DB::raw("CONCAT((end_juz_pages.value - start_juz_pages.value) + 1, ' Halaman') as total"),
+            DB::raw("
+                CASE
+                    WHEN (end_juz_pages.value - start_juz_pages.value + 1) < 20 THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1), ' Halaman')
+                    WHEN (end_juz_pages.value - start_juz_pages.value + 1) % 20 = 0 THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz')
+                    ELSE CONCAT((end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz ', (end_juz_pages.value - start_juz_pages.value + 1) % 20, ' Halaman')
+                END AS total
+            "),
         );
 
         $qWord = Arr::get($data, 'q');
