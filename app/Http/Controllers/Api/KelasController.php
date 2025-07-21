@@ -424,6 +424,17 @@ class KelasController extends Controller
                 ], 422);
             }
 
+            $hasActiveKelas = $this->kelasStudentRepository->isStudentHasActiveKelas(
+                $request->student_uuid,
+                $request->org_uuid);
+
+            if ($hasActiveKelas) {
+                return response()->json([
+                    'status' => KelasResponse::ERROR,
+                    'message' => KelasResponse::HAS_ACTIVE_CLASS_ASSIGNED,
+                ], 422);
+            }
+
             $kelas = $this->kelasStudentRepository->add($validator);
 
             return response()->json([

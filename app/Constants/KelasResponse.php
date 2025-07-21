@@ -18,5 +18,6 @@ class KelasResponse {
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
     CONST ALREADY_ASSIGNED                  = 'Student is already assigned to this Class';
     CONST HAS_ACTIVE_STUDENT                = 'Unable to delete Class. Class has active student.';
-    CONST HAS_ACTIVE_CLASS                = 'Unable to Create CLass. Teacher has another active class.';
+    CONST HAS_ACTIVE_CLASS                  = 'Unable to Create CLass. Teacher has another active class.';
+    CONST HAS_ACTIVE_CLASS_ASSIGNED         = 'Student is already assigned to Active Class';
 }
