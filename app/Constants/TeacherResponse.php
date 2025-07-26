@@ -16,4 +16,5 @@ class TeacherResponse {
     CONST IN_USED                           = 'Teacher is in used. You can`t delete it';
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
     CONST ALREADY_ASSIGNED                  = 'User is already assigned to this Teacher';
+    CONST UNABLE_TO_DELETE                  = 'Unable to Delete Teacher. This Teacher has active Class assigned';
 }

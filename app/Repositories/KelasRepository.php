@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\CommonHelper;
 use App\Models\Kelas;
+use App\Models\KelasStudent;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
@@ -149,6 +150,8 @@ class KelasRepository
         $model->end_date = Carbon::now();
         $model->status = Kelas::STATUS_FINISHED;
         $model->update();
+
+        KelasStudent::where('org_uuid', $model->org_uuid)->update(['status' => 'finished']);
 
         return $model->fresh();
     }

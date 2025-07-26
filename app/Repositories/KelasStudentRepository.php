@@ -144,4 +144,14 @@ class KelasStudentRepository
 
         return $kelasStudent !== 0;
     }
+
+    public function isStudentHasKelas($studentUUID, $orgUUID)
+    {
+        $kelasStudent = KelasStudent::where('student_uuid', $studentUUID)
+            ->where('org_uuid', $orgUUID)
+            ->where('deleted_at', null)
+            ->count();
+
+        return $kelasStudent !== 0;
+    }
 }

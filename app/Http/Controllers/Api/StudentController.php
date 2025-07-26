@@ -9,6 +9,8 @@ use App\Constants\UserResponse;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Repositories\KelasRepository;
+use App\Repositories\KelasStudentRepository;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\StudentRepository;
@@ -26,12 +28,14 @@ class StudentController extends Controller
     protected $orgRepository;
     protected $roleRepository;
     protected $summaryRepository;
+    protected $kelasStudentRepository;
     public function __construct(
         StudentRepository $repository,
         UserRepository $userRepository,
         OrganizationRepository $orgRepository,
         RoleRepository $roleRepository,
         SummaryRepository $summaryRepository,
+        KelasStudentRepository $kelasStudentRepository,
     )
     {
         $this->repository = $repository;
@@ -39,6 +43,7 @@ class StudentController extends Controller
         $this->orgRepository = $orgRepository;
         $this->roleRepository = $roleRepository;
         $this->summaryRepository = $summaryRepository;
+        $this->kelasStudentRepository = $kelasStudentRepository;
     }
 
     public function index(Request $request)
@@ -321,9 +326,20 @@ class StudentController extends Controller
         }
     }
 
-    public function destroy($uuid)
+    public function destroy(Request $request, $uuid)
     {
         try {
+            $hasKelas = $this->kelasStudentRepository->isStudentHasKelas(
+                $uuid,
+                $request->org_uuid);
+
+            if ($hasKelas) {
+                return response()->json([
+                    'status' => StudentResponse::ERROR,
+                    'message' => StudentResponse::UNABLE_TO_DELETE,
+                ], 422);
+            }
+
             $student = $this->repository->find($uuid);
 
             $this->repository->delete($student);

@@ -9,6 +9,7 @@ use App\Constants\UserResponse;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Repositories\KelasRepository;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\TeacherRepository;
@@ -24,17 +25,20 @@ class TeacherController extends Controller
     protected $userRepository;
     protected $orgRepository;
     protected $roleRepository;
+    protected $kelasRepository;
     public function __construct(
         TeacherRepository $repository,
         UserRepository $userRepository,
         OrganizationRepository $orgRepository,
         RoleRepository $roleRepository,
+        KelasRepository $kelasRepository,
     )
     {
         $this->repository = $repository;
         $this->userRepository = $userRepository;
         $this->orgRepository = $orgRepository;
         $this->roleRepository = $roleRepository;
+        $this->kelasRepository = $kelasRepository;
     }
 
     public function index(Request $request)
@@ -273,9 +277,20 @@ class TeacherController extends Controller
         }
     }
 
-    public function destroy($uuid)
+    public function destroy(Request $request, $uuid)
     {
         try {
+            $hasActiveKelas = $this->kelasRepository->hasActiveByTeacherOrg(
+                $uuid,
+                $request->org_uuid);
+
+            if ($hasActiveKelas) {
+                return response()->json([
+                    'status' => TeacherResponse::ERROR,
+                    'message' => TeacherResponse::UNABLE_TO_DELETE,
+                ], 422);
+            }
+
             $teacher = $this->repository->find($uuid);
 
             $this->repository->delete($teacher);

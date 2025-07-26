@@ -16,4 +16,5 @@ class StudentResponse {
     CONST IN_USED                           = 'Student is in used. You can`t delete it';
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
     CONST ALREADY_ASSIGNED                  = 'User is already assigned to this Student';
+    CONST UNABLE_TO_DELETE                  = 'Unable to Delete Student. This User has Class assigned';
 }
