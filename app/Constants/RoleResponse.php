@@ -17,4 +17,5 @@ class RoleResponse {
     CONST IN_USED                           = 'Role is in used. You can`t delete it';
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
     CONST ALREADY_ASSIGNED                  = 'User is already assigned to this Role';
+    CONST EMAIL_EXIST                       = 'Unable to create user. Email is exist';
 }

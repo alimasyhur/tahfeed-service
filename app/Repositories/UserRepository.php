@@ -60,6 +60,14 @@ class UserRepository
         return $user;
     }
 
+    public function findByEmail($email)
+    {
+        $user = User::where('email', $email)
+            ->first();
+
+        return $user;
+    }
+
     public function count($data)
     {
         $model = $this->getQuery($data);

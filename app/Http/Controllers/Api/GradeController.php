@@ -205,6 +205,13 @@ class GradeController extends Controller
     public function destroy($uuid)
     {
         try {
+            if ($this->repository->hasActiveStudent($uuid)) {
+                return response()->json([
+                    'status' => GradeResponse::ERROR,
+                    'message' => GradeResponse::HAS_ACTIVE_STUDENT,
+                ]);
+            }
+
             $grade = $this->repository->find($uuid);
 
             $this->repository->delete($grade);

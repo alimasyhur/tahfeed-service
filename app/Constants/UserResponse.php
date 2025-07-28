@@ -13,4 +13,5 @@ class UserResponse {
     CONST ERROR                             = 'error';
     CONST EXIST                             = 'User is already exist';
     CONST ACCOUNT_NOT_ACTIVE                = 'Your account is not active. Contact your Administrator.';
+    CONST EMAIL_NOT_FOUND                   = 'Email is not found';
 }

@@ -112,6 +112,16 @@ class RoleUserController extends Controller
             $validator->validate();
             $validator = $validator->safe()->all();
 
+            $userEmail = Arr::get($validator, 'email');
+            $isEmailExist = $this->userRepository->findByEmail($userEmail);
+            if ($isEmailExist) {
+                return response()->json([
+                    'status' => RoleResponse::ERROR,
+                    'message' => RoleResponse::EMAIL_EXIST,
+                    'data' => $validator,
+                ], 422);
+            }
+
             $orgUuid = Arr::get($validator, 'org_uuid');
             $org = $this->orgRepository->findByUUID($orgUuid);
             if(empty($org)) {
@@ -180,7 +190,7 @@ class RoleUserController extends Controller
             $data = $request->all();
 
             $rules = [
-                'user_uuid' => ['required', 'string'],
+                'email' => ['required', 'string'],
                 'role_uuid'=> ['required', 'string'],
                 'org_uuid' => ['required', 'string'],
             ];
@@ -190,16 +200,17 @@ class RoleUserController extends Controller
             $validator->validate();
             $validator = $validator->safe()->all();
 
-            $userUuid = Arr::get($validator, 'user_uuid');
-            $user = $this->userRepository->find($userUuid);
-            if(empty($user)) {
+            $user = $this->userRepository->findByEmail(Arr::get($validator, 'email'));
+            if (!$user) {
                 return response()->json([
                     'status' => RoleResponse::ERROR,
-                    'message' => UserResponse::NOT_FOUND,
+                    'message' => UserResponse::EMAIL_NOT_FOUND,
                     'data' => $validator,
                 ], 422);
             }
+
             Arr::set($validator, 'user_name', $user->name);
+            Arr::set($validator, 'user_uuid', $user->uuid);
 
             $orgUuid = Arr::get($validator, 'org_uuid');
             $org = $this->orgRepository->findByUUID($orgUuid);
@@ -325,14 +336,6 @@ class RoleUserController extends Controller
             Arr::set($validator, 'org_uuid', $userOrgRole->org_uuid);
             Arr::set($validator, 'org_name', $userOrgRole->org_name);
 
-            $isAlreadyAssigned = RoleUserRepository::isAlreadyAssigned($validator);
-            if ($isAlreadyAssigned) {
-                return response()->json([
-                    'status' => RoleResponse::ERROR,
-                    'message' => RoleResponse::ALREADY_ASSIGNED,
-                    'data' => $validator,
-                ], 422);
-            }
 
             $roleUser = $this->repository->update($uuid, $validator);
 

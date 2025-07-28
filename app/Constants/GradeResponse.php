@@ -17,4 +17,5 @@ class GradeResponse {
     CONST IN_USED                           = 'Grade is in used. You can`t delete it';
     CONST NOT_AUTHORIZED                    = 'You are not authorized to perform this action';
     CONST ALREADY_ASSIGNED                  = 'User is already assigned to this Grade';
+    CONST HAS_ACTIVE_STUDENT                = 'Unable to delete Grade. Grade has active student.';
 }

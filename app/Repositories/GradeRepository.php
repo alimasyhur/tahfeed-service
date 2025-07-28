@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\CommonHelper;
 use App\Models\Grade;
+use App\Models\Student;
 use Illuminate\Support\Arr;
 
 class GradeRepository
@@ -99,5 +100,13 @@ class GradeRepository
     {
         $model = $this->getQuery($data);
         return $model->count();
+    }
+
+    public function hasActiveStudent($gradeUUID) {
+        $kelasStudent = Student::where('grade_uuid', $gradeUUID)
+            ->where('deleted_at', null)
+            ->count();
+
+        return $kelasStudent !== 0;
     }
 }

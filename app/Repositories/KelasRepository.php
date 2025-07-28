@@ -17,10 +17,13 @@ class KelasRepository
     {
         $model = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
             ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
+            ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
             ->select(
                 'kelas.*',
                 'organizations.name as org_name',
                 'grades.period as period',
+                'teachers.firstname as teacher_firstname',
+                'teachers.lastname as teacher_lastname',
             );
 
         $qWord = Arr::get($data, 'q');

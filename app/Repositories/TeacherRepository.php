@@ -65,9 +65,13 @@ class TeacherRepository
     {
         DB::beginTransaction();
         try {
+            $orgUUID = Arr::get($data, 'org_uuid');
+            $userUUID = Arr::get($data, 'user_uuid');
+            $roleUUID = Arr::get($data, 'role_uuid');
+
             $teacher = new Teacher();
-            $teacher->user_uuid = Arr::get($data, 'user_uuid');
-            $teacher->org_uuid = Arr::get($data, 'org_uuid');
+            $teacher->user_uuid = $userUUID;
+            $teacher->org_uuid = $orgUUID;
             $teacher->nik = Arr::get($data, 'nik');
             $teacher->firstname = Arr::get($data, 'firstname');
             $teacher->lastname = Arr::get($data, 'lastname');
@@ -77,16 +81,23 @@ class TeacherRepository
 
             $teacher->save();
 
-            $model = new OrgUserRole();
-            $model->user_uuid = Arr::get($data, 'user_uuid');
-            $model->org_uuid = Arr::get($data, 'org_uuid');
-            $model->org_name = Arr::get($data, 'org_name');
-            $model->role_uuid = Arr::get($data, 'role_uuid');
-            $model->role_name = Arr::get($data, 'role_name');
-            $model->constant_value = Arr::get($data, 'constant_value');
-            $model->is_active = Role::ACTIVE;
-            $model->is_confirmed = Role::CONFIRMED;
-            $model->save();
+            $existingUserRole = OrgUserRole::where('org_uuid', $orgUUID)
+                ->where('user_uuid', $userUUID)
+                ->where('role_uuid', $roleUUID)
+                ->first();
+
+            if (!$existingUserRole) {
+                $model = new OrgUserRole();
+                $model->user_uuid = $userUUID;
+                $model->org_uuid = $orgUUID;
+                $model->org_name = Arr::get($data, 'org_name');
+                $model->role_uuid = $roleUUID;
+                $model->role_name = Arr::get($data, 'role_name');
+                $model->constant_value = Arr::get($data, 'constant_value');
+                $model->is_active = Role::ACTIVE;
+                $model->is_confirmed = Role::CONFIRMED;
+                $model->save();
+            }
 
             DB::commit();
 
@@ -108,7 +119,24 @@ class TeacherRepository
 
     public function delete(Teacher $teacher)
     {
-        return $teacher->delete();
+        DB::beginTransaction();
+        try {
+            OrgUserRole::where('user_uuid', $teacher->user_uuid)
+                ->where('org_uuid', $teacher->org_uuid)
+                ->where('role_name', 'Teacher')
+                ->delete();
+
+            $teacher->delete();
+
+            DB::commit();
+
+            return $teacher;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $teacher;
     }
 
     public function count($data)
