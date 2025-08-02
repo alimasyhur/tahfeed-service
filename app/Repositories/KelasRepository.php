@@ -18,12 +18,14 @@ class KelasRepository
         $model = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
             ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
             ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
+            ->join('users', 'teachers.user_uuid', '=', 'users.uuid')
             ->select(
                 'kelas.*',
                 'organizations.name as org_name',
                 'grades.period as period',
                 'teachers.firstname as teacher_firstname',
                 'teachers.lastname as teacher_lastname',
+                'users.email as teacher_email',
             );
 
         $qWord = Arr::get($data, 'q');
@@ -76,6 +78,7 @@ class KelasRepository
         $kelas = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
             ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
             ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
+            ->join('users', 'teachers.user_uuid', '=', 'users.uuid')
             ->select(
                 'kelas.*',
                 'organizations.name as org_name',
@@ -84,6 +87,7 @@ class KelasRepository
                 'teachers.nik as teacher_nik',
                 'teachers.firstname as teacher_firstname',
                 'teachers.lastname as teacher_lastname',
+                'users.email as teacher_email',
             )->where('kelas.uuid', $uuid)
             ->first();
 
