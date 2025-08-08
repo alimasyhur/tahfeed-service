@@ -352,23 +352,23 @@ class ReportController extends Controller
                     'required',
                     'string',
                 ],
-                'start_juz_page_uuid' => [
+                'start_juz_uuid' => [
                     'required',
                     'string',
                 ],
-                'end_juz_page_uuid' => [
+                'start_page_uuid' => [
+                    'required',
+                    'string',
+                ],
+                'end_juz_uuid' => [
+                    'required',
+                    'string',
+                ],
+                'end_page_uuid' => [
                     'required',
                     'string',
                 ],
                 'date_input' => [
-                    'required',
-                    'string',
-                ],
-                'name' => [
-                    'required',
-                    'string',
-                ],
-                'description' => [
                     'required',
                     'string',
                 ],
@@ -438,8 +438,9 @@ class ReportController extends Controller
                 ], 422);
             }
 
-            $startJuzPageUUID = Arr::get($validator, 'start_juz_page_uuid');
-            $startJuzPage = $this->juzPageRepository->find($startJuzPageUUID);
+            $startJuzUUID = Arr::get($validator, 'start_juz_uuid');
+            $startPageUUID = Arr::get($validator, 'start_page_uuid');
+            $startJuzPage = $this->juzPageRepository->findByJuzPageUUID($startJuzUUID, $startPageUUID);
             if(empty($startJuzPage)) {
                 return response()->json([
                     'status' => JuzPageResponse::ERROR,
@@ -447,9 +448,11 @@ class ReportController extends Controller
                     'data' => $validator,
                 ], 422);
             }
+            Arr::set($validator, 'start_juz_page_uuid', $startJuzPage->uuid);
 
-            $endJuzPageUUID = Arr::get($validator, 'end_juz_page_uuid');
-            $endJuzPage = $this->juzPageRepository->find($endJuzPageUUID);
+            $endJuzUUID = Arr::get($validator, 'end_juz_uuid');
+            $endPageUUID = Arr::get($validator, 'end_page_uuid');
+            $endJuzPage = $this->juzPageRepository->findByJuzPageUUID($endJuzUUID, $endPageUUID);
             if(empty($endJuzPage)) {
                 return response()->json([
                     'status' => JuzPageResponse::ERROR,
@@ -457,6 +460,7 @@ class ReportController extends Controller
                     'data' => $validator,
                 ], 422);
             }
+            Arr::set($validator, 'end_juz_page_uuid', $endJuzPage->uuid);
 
             if ($startJuzPage->value > $endJuzPage->value) {
                 return response()->json([

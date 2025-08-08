@@ -9,7 +9,6 @@ use App\Constants\UserResponse;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
-use App\Repositories\KelasRepository;
 use App\Repositories\KelasStudentRepository;
 use App\Repositories\OrganizationRepository;
 use App\Repositories\RoleRepository;
@@ -128,7 +127,7 @@ class StudentController extends Controller
                     'unique:students,org_uuid',
                     Rule::unique('students')->where(function ($query) use ($request) {
                         return $query->where('org_uuid', $request->org_uuid)
-                            ->where('deleted_at', '!=', null);
+                            ->where('deleted_at', '=', null);
                     }),
                 ],
                 'nis' => [
@@ -137,7 +136,7 @@ class StudentController extends Controller
                     'unique:students,org_uuid',
                     Rule::unique('students')->where(function ($query) use ($request) {
                         return $query->where('org_uuid', $request->org_uuid)
-                            ->where('deleted_at', '!=', null);
+                            ->where('deleted_at', '=', null);
                     }),
                 ],
                 'firstname' => [
