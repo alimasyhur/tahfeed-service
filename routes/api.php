@@ -127,4 +127,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('achievements')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\SummaryController::class, 'index']);
     });
+
+    Route::prefix('dashboards')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
+    });
 });
