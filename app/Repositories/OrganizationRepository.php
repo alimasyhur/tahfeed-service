@@ -10,8 +10,10 @@ use App\Models\OrgUserRole;
 use App\Models\Role;
 use App\Models\TemplateQuran;
 use App\Models\TemplateQuranOrg;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrganizationRepository
 {
@@ -154,6 +156,22 @@ class OrganizationRepository
         return $organization;
     }
 
+    public function findByOrgUserUUID($userUUID, $orgUUID)
+    {
+        $orgUser = OrgUserRole::where('user_uuid', $userUUID)
+            ->where('org_uuid', $orgUUID)
+            ->first();
+
+        if (!$orgUser) {
+            throw new Exception('User does not belogs to this org');
+        }
+
+        $organization = Organization::where('uuid', $orgUUID)
+            ->first();
+
+        return $organization;
+    }
+
     public function add($data)
     {
         DB::beginTransaction();
@@ -206,6 +224,9 @@ class OrganizationRepository
     public function update($organization, $data)
     {
         $organization->update($data);
+
+        OrgUserRole::where('org_uuid', $organization->uuid)
+            ->update(['org_name' => $organization->name]);
 
         $organization->fresh();
         return $organization;

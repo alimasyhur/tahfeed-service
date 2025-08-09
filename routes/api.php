@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ImageUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -131,4 +132,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('dashboards')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
     });
+
+    // Image Upload Routes
+    Route::prefix('images')->name('images.')->group(function () {
+
+        // Profile Picture Routes
+        Route::post('/profiles/upload', [ImageUploadController::class, 'uploadProfilePicture'])
+            ->name('profile.upload');
+        Route::delete('/profiles/delete', [ImageUploadController::class, 'deleteProfilePicture'])
+            ->name('profile.delete');
+
+        // Organization Logo Routes
+        Route::post('/organizations/upload', [ImageUploadController::class, 'uploadOrganizationLogo'])
+            ->name('organization.upload');
+        Route::delete('/organizations/delete', [ImageUploadController::class, 'deleteOrganizationLogo'])
+            ->name('organization.delete');
+    });
+
 });

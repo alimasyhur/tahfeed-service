@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Repositories\ImageUploadRepository;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,5 +33,37 @@ class Organization extends Model
         'is_verified',
         'is_active',
         'created_by',
+        'logo_image',
     ];
+
+    /**
+     * Get the logo image URL
+     *
+     * @return string|null
+     */
+    public function getLogoImageUrlAttribute(): ?string
+    {
+        if (!$this->logo_image) {
+            return null;
+        }
+
+        $imageService = app(ImageUploadRepository::class);
+        return $imageService->getImageUrl('organization', $this->uuid, $this->logo_image);
+    }
+
+    /**
+     * Get the logo image thumbnail URL
+     *
+     * @return string|null
+     */
+    public function getLogoImageThumbnailUrlAttribute(): ?string
+    {
+        if (!$this->logo_image) {
+            return null;
+        }
+
+        $imageService = app(ImageUploadRepository::class);
+        return $imageService->getImageUrl('organization', $this->uuid, $this->logo_image, true);
+    }
+
 }

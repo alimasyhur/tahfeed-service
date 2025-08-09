@@ -153,10 +153,17 @@ class ProfileController extends Controller
         $user = $request->user();
         $userUuid = $user->uuid;
         $profile = $this->repository->find($userUuid);
+        if ($profile->profile_image) {
+            Arr::set($profile, 'profile_image_url', $profile->getProfileImageUrlAttribute());
+        }
+
         $rolesFilter = ['filter' => ['user_uuid' => $userUuid]];
         $roles = $this->roleRepository->browse($rolesFilter);
         $orgUuid = Arr::get($roles, '0.org_uuid');
         $organization = $this->orgRepository->findByUUID($orgUuid);
+        if ($organization->logo_image) {
+            Arr::set($organization, 'logo_image_url', $organization->getLogoImageThumbnailUrlAttribute());
+        }
         $orgFilter = ['filter' => ['org_uuid' => $orgUuid]];
         $quranOrg = $this->quranOrgRepository->browse($orgFilter);
         $kelas = $this->kelasRepository->findActiveKelasByUserUUID($userUuid);
