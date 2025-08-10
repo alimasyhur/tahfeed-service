@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Repositories\ImageUploadRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,8 +35,16 @@ class AppServiceProvider extends ServiceProvider
 
         // Set upload limits if not configured
         if (ini_get('upload_max_filesize') === '2M') {
-            ini_set('upload_max_filesize', '10M');
-            ini_set('post_max_size', '12M');
+            ini_set('upload_max_filesize', '2M');
+            ini_set('post_max_size', '5M');
         }
+
+        DB::listen(function ($query) {
+        if ($query->time > 1000) { // Query lebih dari 1 detik
+            Log::info('Slow Query: ' . $query->time . 'ms');
+            Log::info('SQL: ' . $query->sql);
+            Log::info('Bindings: ' . json_encode($query->bindings));
+        }
+    });
     }
 }

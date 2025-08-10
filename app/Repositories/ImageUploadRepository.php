@@ -121,14 +121,6 @@ class ImageUploadRepository
             // Create and save thumbnail
             $this->createAndSaveThumbnail($image, $thumbnailPath);
 
-            // Log successful upload
-            Log::info("Organization logo uploaded successfully", [
-                'org_uuid' => $orgUuid,
-                'filename' => $filename,
-                'original_name' => $image->getClientOriginalName(),
-                'size' => $image->getSize()
-            ]);
-
             return [
                 'filename' => $filename,
                 'url' => Storage::disk('public')->url($imagePath),

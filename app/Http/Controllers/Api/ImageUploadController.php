@@ -92,10 +92,6 @@ class ImageUploadController extends Controller
     public function uploadOrganizationLogo(UploadImageRequest $request): JsonResponse
     {
         $orgUUID = $request->org_uuid;
-        Log::info('ORG_UUID: ', [
-            'org_uuid' => $orgUUID,
-        ]);
-
         try {
             DB::beginTransaction();
 
