@@ -16,78 +16,70 @@ class StudentRepository
 
     private function getQuery($data = null)
     {
-        $model = Student::join('organizations', function($join) {
-            $join->on('students.org_uuid', '=', 'organizations.uuid')
-                ->whereNull('organizations.deleted_at');
-        })->join('grades', function($join) {
-            $join->on('students.grade_uuid', '=', 'grades.uuid')
-                ->whereNull('grades.deleted_at');
-        });
+        $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
 
-        $model->select(
+        $baseSelect = [
             'students.*',
             'organizations.name as org_name',
-            'grades.period AS grade_period',
-        );
+            'grades.period as grade_period',
+            DB::raw("CONCAT(students.firstname, ' ', students.lastname) as full_name")
+        ];
 
-        $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
-        if (!empty($kelasUUID)) {
-            $model->join('kelas_students', function($join) {
-                $join->on('students.uuid', '=', 'kelas_students.student_uuid')
-                    ->whereNull('kelas_students.deleted_at');
-            })->select(
-                    'students.*',
-                    'organizations.name as org_name',
-                    'grades.period AS grade_period',
-                    'kelas_students.kelas_uuid AS student_kelas_uuid',
-                );
-        }
+        $selectWithKelas = array_merge($baseSelect, [
+            'kelas_students.kelas_uuid as student_kelas_uuid'
+        ]);
 
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('students.nik', 'like', "%$qWord%")
-                    ->orWhere('students.nis', 'like', "%$qWord%")
-                    ->orWhere('students.firstname', 'like', "%$qWord%")
-                    ->orWhere('students.lastname', 'like', "%$qWord%")
-                    ->orWhere('students.birthdate', 'like', "%$qWord%")
-                    ->orWhere('students.phone', 'like', "%$qWord%")
-                    ->orWhere('students.bio', 'like', "%$qWord%")
-                    ->orWhere('grades.period', 'like', "%$qWord%");
+        return Student::query()
+            ->join('organizations', function($join) {
+                $join->on('students.org_uuid', '=', 'organizations.uuid')
+                    ->whereNull('organizations.deleted_at');
+            })
+            ->join('grades', function($join) {
+                $join->on('students.grade_uuid', '=', 'grades.uuid')
+                    ->whereNull('grades.deleted_at');
+            })
+            ->when($kelasUUID, function ($query) use ($selectWithKelas, $kelasUUID) {
+                $query->join('kelas_students', function($join) use ($kelasUUID) {
+                    $join->on('students.uuid', '=', 'kelas_students.student_uuid')
+                        ->where('kelas_students.kelas_uuid', $kelasUUID)
+                        ->whereNull('kelas_students.deleted_at');
+                })
+                ->select($selectWithKelas);
+            }, function ($query) use ($baseSelect) {
+                $query->select($baseSelect);
+            })
+            ->when(Arr::get($data, 'q'), function ($query, $qWord) {
+                $query->where(function ($subQuery) use ($qWord) {
+                    // Prioritas pencarian: nama, nis/nik, phone, bio
+                    $subQuery->where('students.firstname', 'like', "%{$qWord}%")
+                            ->orWhere('students.lastname', 'like', "%{$qWord}%")
+                            ->orWhere('students.nis', 'like', "%{$qWord}%")
+                            ->orWhere('students.nik', 'like', "%{$qWord}%")
+                            ->orWhere('students.phone', 'like', "%{$qWord}%")
+                            ->orWhere('students.bio', 'like', "%{$qWord}%")
+                            ->orWhere('grades.period', 'like', "%{$qWord}%");
+
+                    // Handle birthdate search dengan exact match untuk performa
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $qWord)) {
+                        $subQuery->orWhere('students.birthdate', $qWord);
+                    }
+                });
+            })
+            ->when(Arr::get($data, 'filter.nik'), function ($query, $nik) {
+                $query->where('students.nik', $nik);
+            })
+            ->when(Arr::get($data, 'filter.nis'), function ($query, $nis) {
+                $query->where('students.nis', $nis);
+            })
+            ->when(Arr::get($data, 'filter.user_uuid'), function ($query, $userUUID) {
+                $query->where('students.user_uuid', $userUUID);
+            })
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+                $query->where('students.org_uuid', $orgUUID);
+            })
+            ->when(Arr::get($data, 'filter.grade_uuid'), function ($query, $gradeUUID) {
+                $query->where('students.grade_uuid', $gradeUUID);
             });
-        }
-
-        $nik = Arr::get($data, 'filter.nik');
-        if (!empty($nik)) {
-            $model->where('students.nik', $nik);
-        }
-
-        $nis = Arr::get($data, 'filter.nis');
-        if (!empty($nis)) {
-            $model->where('students.nis', $nis);
-        }
-
-        $userUUID = Arr::get($data, 'filter.user_uuid');
-        if (!empty($userUUID)) {
-            $model->where('students.user_uuid', $userUUID);
-        }
-
-        $orgUUID = Arr::get($data, 'filter.org_uuid');
-        if (!empty($orgUUID)) {
-            $model->where('students.org_uuid', $orgUUID);
-        }
-
-        $gradeUUID = Arr::get($data, 'filter.grade_uuid');
-        if (!empty($gradeUUID)) {
-            $model->where('students.grade_uuid', $gradeUUID);
-        }
-
-        if (!empty($kelasUUID)) {
-            $model->where('kelas_students.kelas_uuid', $kelasUUID)
-                ->where('kelas_students.deleted_at', null);
-        }
-
-        return $model;
     }
 
     public function browse($data = null)

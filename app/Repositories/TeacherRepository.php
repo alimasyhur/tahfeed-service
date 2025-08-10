@@ -16,34 +16,38 @@ class TeacherRepository
 
     private function getQuery($data = null)
     {
-        $model = Teacher::join('organizations', function($join) {
-            $join->on('teachers.org_uuid', '=', 'organizations.uuid')
-                ->whereNull('organizations.deleted_at');
-        })->select('teachers.*', 'organizations.name as org_name');
+        return Teacher::query()
+            ->join('organizations', function($join) {
+                $join->on('teachers.org_uuid', '=', 'organizations.uuid')
+                    ->whereNull('organizations.deleted_at');
+            })
+            ->select([
+                'teachers.*',
+                'organizations.name as org_name',
+                DB::raw("CONCAT(teachers.firstname, ' ', teachers.lastname) as full_name")
+            ])
+            ->when(Arr::get($data, 'q'), function ($query, $qWord) {
+                $query->where(function ($subQuery) use ($qWord) {
+                    $subQuery->where('teachers.firstname', 'like', "%{$qWord}%")
+                            ->orWhere('teachers.lastname', 'like', "%{$qWord}%")
+                            ->orWhere('teachers.nik', 'like', "%{$qWord}%")
+                            ->orWhere('teachers.phone', 'like', "%{$qWord}%")
+                            ->orWhere('teachers.bio', 'like', "%{$qWord}%");
 
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('teachers.nik', 'like', "%$qWord%")
-                    ->orWhere('teachers.firstname', 'like', "%$qWord%")
-                    ->orWhere('teachers.lastname', 'like', "%$qWord%")
-                    ->orWhere('teachers.birthdate', 'like', "%$qWord%")
-                    ->orWhere('teachers.phone', 'like', "%$qWord%")
-                    ->orWhere('teachers.bio', 'like', "%$qWord%");
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $qWord)) {
+                        $subQuery->orWhere('teachers.birthdate', $qWord);
+                    }
+                });
+            })
+            ->when(Arr::get($data, 'filter.nik'), function ($query, $nik) {
+                $query->where('teachers.nik', $nik);
+            })
+            ->when(Arr::get($data, 'filter.user_uuid'), function ($query, $userUUID) {
+                $query->where('teachers.user_uuid', $userUUID);
+            })
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+                $query->where('teachers.org_uuid', $orgUUID);
             });
-        }
-
-        $userUUID = Arr::get($data, 'filter.user_uuid');
-        if (!empty($userUUID)) {
-            $model->where('teachers.nik', $userUUID);
-        }
-
-        $orgUUID = Arr::get($data, 'filter.org_uuid');
-        if (!empty($orgUUID)) {
-            $model->where('teachers.org_uuid', $orgUUID);
-        }
-
-        return $model;
     }
 
     public function browse($data = null)

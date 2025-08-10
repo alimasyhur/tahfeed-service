@@ -22,82 +22,71 @@ class ReportRepository
 
     private function getQuery($data = null)
     {
-        $model = Report::join('students', function($join) {
-        $join->on('reports.student_uuid', '=', 'students.uuid')
-             ->whereNull('students.deleted_at');
-        })->join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
-        ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
-        ->select(
-            'reports.*',
-            'students.nis as student_nis',
-            DB::raw("CONCAT(students.firstname, ' ', students.lastname) as student_fullname"),
-            'students.firstname as student_firstname',
-            'students.lastname as student_lastname',
-            'start_juz_pages.description as start_juz_page_name',
-            'end_juz_pages.description as end_juz_page_name',
-            DB::raw("
-                CASE
-                    WHEN (end_juz_pages.value - start_juz_pages.value + 1) < 20 THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1), ' Halaman')
-                    WHEN (end_juz_pages.value - start_juz_pages.value + 1) % 20 = 0 THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz')
-                    ELSE CONCAT((end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz ', (end_juz_pages.value - start_juz_pages.value + 1) % 20, ' Halaman')
-                END AS total
-            "),
-        );
+        $model = Report::query()
+            ->join('students', function($join) {
+                $join->on('reports.student_uuid', '=', 'students.uuid')
+                    ->whereNull('students.deleted_at');
+            })
+            ->join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
+            ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
+            ->select([
+                'reports.*',
+                'students.nis as student_nis',
+                DB::raw("CONCAT(students.firstname, ' ', students.lastname) as student_fullname"),
+                'students.firstname as student_firstname',
+                'students.lastname as student_lastname',
+                'start_juz_pages.description as start_juz_page_name',
+                'end_juz_pages.description as end_juz_page_name',
+                DB::raw("
+                    CASE
+                        WHEN (end_juz_pages.value - start_juz_pages.value + 1) < 20
+                        THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1), ' Halaman')
+                        WHEN (end_juz_pages.value - start_juz_pages.value + 1) % 20 = 0
+                        THEN CONCAT((end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz')
+                        ELSE CONCAT(
+                            (end_juz_pages.value - start_juz_pages.value + 1) DIV 20, ' Juz ',
+                            (end_juz_pages.value - start_juz_pages.value + 1) % 20, ' Halaman'
+                        )
+                    END AS total
+                ")
+            ]);
 
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('name', 'like', "%$qWord%");
-                $query->orWhere('description', 'like', "%$qWord%");
-                $query->orWhere('type_report', 'like', "%$qWord%");
-                $query->orWhere('note', 'like', "%$qWord%");
+        // Apply filters using when() for cleaner conditional queries
+        $model->when(Arr::get($data, 'q'), function ($query, $qWord) {
+            $query->where(function ($subQuery) use ($qWord) {
+                $subQuery->where('reports.name', 'like', "%{$qWord}%")
+                        ->orWhere('reports.description', 'like', "%{$qWord}%")
+                        ->orWhere('reports.type_report', 'like', "%{$qWord}%")
+                        ->orWhere('reports.note', 'like', "%{$qWord}%");
             });
-        }
-
-        $uuid = Arr::get($data, 'filter.uuid');
-        if (!empty($uuid)) {
-            $model->where('uuid', '=', "$uuid");
-        }
-
-        $dateInput = Arr::get($data, 'filter.date_input');
-        if (!empty($dateInput)) {
-            $model->where('date_input', '=', "$dateInput");
-        }
-
-        $studentUUID = Arr::get($data, 'filter.student_uuid');
-        if (!empty($studentUUID)) {
-            $model->where('student_uuid', '=', "$studentUUID");
-        }
-
-        $orgUUID = Arr::get($data, 'filter.org_uuid');
-        if (!empty($orgUUID)) {
-            $model->where('reports.org_uuid', '=', "$orgUUID");
-        }
-
-        $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
-        if (!empty($kelasUUID)) {
-            $model->where('kelas_uuid', '=', "$kelasUUID");
-        }
-
-        $teacherUUID = Arr::get($data, 'filter.teacher_uuid');
-        if (!empty($teacherUUID)) {
-            $model->where('reports.teacher_uuid', '=', "$teacherUUID");
-        }
-
-        $startJuzPageUUID = Arr::get($data, 'filter.start_juz_page_uuid');
-        if (!empty($startJuzPageUUID)) {
-            $model->where('start_juz_page_uuid', '=', "$startJuzPageUUID");
-        }
-
-        $endJuzPageUUID = Arr::get($data, 'filter.end_juz_page_uuid');
-        if (!empty($endJuzPageUUID)) {
-            $model->where('end_juz_page_uuid', '=', "$endJuzPageUUID");
-        }
-
-        $isLocked = Arr::get($data, 'filter.is_locked');
-        if (!empty($isLocked)) {
-            $model->where('is_locked', '=', "$isLocked");
-        }
+        })
+        ->when(Arr::get($data, 'filter.uuid'), function ($query, $uuid) {
+            $query->where('reports.uuid', $uuid);
+        })
+        ->when(Arr::get($data, 'filter.date_input'), function ($query, $dateInput) {
+            $query->where('reports.date_input', $dateInput);
+        })
+        ->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUUID) {
+            $query->where('reports.student_uuid', $studentUUID);
+        })
+        ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+            $query->where('reports.org_uuid', $orgUUID);
+        })
+        ->when(Arr::get($data, 'filter.kelas_uuid'), function ($query, $kelasUUID) {
+            $query->where('reports.kelas_uuid', $kelasUUID);
+        })
+        ->when(Arr::get($data, 'filter.teacher_uuid'), function ($query, $teacherUUID) {
+            $query->where('reports.teacher_uuid', $teacherUUID);
+        })
+        ->when(Arr::get($data, 'filter.start_juz_page_uuid'), function ($query, $startJuzPageUUID) {
+            $query->where('reports.start_juz_page_uuid', $startJuzPageUUID);
+        })
+        ->when(Arr::get($data, 'filter.end_juz_page_uuid'), function ($query, $endJuzPageUUID) {
+            $query->where('reports.end_juz_page_uuid', $endJuzPageUUID);
+        })
+        ->when(Arr::get($data, 'filter.is_locked'), function ($query, $isLocked) {
+            $query->where('reports.is_locked', $isLocked);
+        });
 
         return $model;
     }

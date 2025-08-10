@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\KelasStudent;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class KelasRepository
 {
@@ -15,62 +16,53 @@ class KelasRepository
 
     private function getQuery($data = null)
     {
-        $model = Kelas::join('organizations', function($join) {
-            $join->on('kelas.org_uuid', '=', 'organizations.uuid')
-                ->whereNull('organizations.deleted_at');
-            })->join('grades', function($join) {
+        return Kelas::query()
+            ->join('organizations', function($join) {
+                $join->on('kelas.org_uuid', '=', 'organizations.uuid')
+                    ->whereNull('organizations.deleted_at');
+            })
+            ->join('grades', function($join) {
                 $join->on('kelas.grade_uuid', '=', 'grades.uuid')
                     ->whereNull('grades.deleted_at');
-            })->join('teachers', function($join) {
+            })
+            ->join('teachers', function($join) {
                 $join->on('kelas.teacher_uuid', '=', 'teachers.uuid')
                     ->whereNull('teachers.deleted_at');
-            })->join('users', function($join) {
+            })
+            ->join('users', function($join) {
                 $join->on('teachers.user_uuid', '=', 'users.uuid')
                     ->whereNull('users.deleted_at');
             })
-            ->select(
+            ->select([
                 'kelas.*',
                 'organizations.name as org_name',
                 'grades.period as period',
                 'teachers.firstname as teacher_firstname',
                 'teachers.lastname as teacher_lastname',
                 'users.email as teacher_email',
-            );
-
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('kelas.name', 'like', "%$qWord%");
-                $query->orWhere('kelas.description', 'like', "%$qWord%");
+                DB::raw("CONCAT(teachers.firstname, ' ', teachers.lastname) as teacher_full_name")
+            ])
+            ->when(Arr::get($data, 'q'), function ($query, $qWord) {
+                $query->where(function ($subQuery) use ($qWord) {
+                    $subQuery->where('kelas.name', 'like', "%{$qWord}%")
+                            ->orWhere('kelas.description', 'like', "%{$qWord}%");
+                });
+            })
+            ->when(Arr::get($data, 'filter.name'), function ($query, $name) {
+                $query->where('kelas.name', 'like', "%{$name}%");
+            })
+            ->when(Arr::get($data, 'filter.uuid'), function ($query, $uuid) {
+                $query->where('kelas.uuid', $uuid);
+            })
+            ->when(Arr::get($data, 'filter.teacher_uuid'), function ($query, $teacherUuid) {
+                $query->where('kelas.teacher_uuid', $teacherUuid);
+            })
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUuid) {
+                $query->where('kelas.org_uuid', $orgUuid);
+            })
+            ->when(Arr::get($data, 'filter.grade_uuid'), function ($query, $gradeUuid) {
+                $query->where('kelas.grade_uuid', $gradeUuid);
             });
-        }
-
-        $name = Arr::get($data, 'filter.name');
-        if (!empty($name)) {
-            $model->where('kelas.name', 'like', "%$name%");
-        }
-
-        $uuid = Arr::get($data, 'filter.uuid');
-        if (!empty($uuid)) {
-            $model->where('kelas.uuid', '=', "$uuid");
-        }
-
-        $teacherUuid = Arr::get($data, 'filter.teacher_uuid');
-        if (!empty($teacherUuid)) {
-            $model->where('kelas.teacher_uuid', $teacherUuid);
-        }
-
-        $orgUuid = Arr::get($data, 'filter.org_uuid');
-        if (!empty($orgUuid)) {
-            $model->where('kelas.org_uuid', $orgUuid);
-        }
-
-        $gradeUuid = Arr::get($data, 'filter.grade_uuid');
-        if (!empty($gradeUuid)) {
-            $model->where('kelas.grade_uuid', '=', "$gradeUuid");
-        }
-
-        return $model;
     }
 
     public function browse($data = null)

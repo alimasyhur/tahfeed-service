@@ -14,36 +14,28 @@ class GradeRepository
 
     private function getQuery($data = null)
     {
-        $model = Grade::join('organizations', function($join) {
-            $join->on('grades.org_uuid', '=', 'organizations.uuid')
-                ->whereNull('organizations.deleted_at');
-        })->select('grades.*', 'organizations.name as org_name');
-
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('grades.name', 'like', "%$qWord%");
-                $query->orWhere('grades.description', 'like', "%$qWord%");
-                $query->orWhere('grades.period', 'like', "%$qWord%");
+        return Grade::query()
+            ->join('organizations', function($join) {
+                $join->on('grades.org_uuid', '=', 'organizations.uuid')
+                    ->whereNull('organizations.deleted_at');
+            })
+            ->select(['grades.*', 'organizations.name as org_name'])
+            ->when(Arr::get($data, 'q'), function ($query, $qWord) {
+                $query->where(function ($subQuery) use ($qWord) {
+                    $subQuery->where('grades.name', 'like', "%{$qWord}%")
+                            ->orWhere('grades.description', 'like', "%{$qWord}%")
+                            ->orWhere('grades.period', 'like', "%{$qWord}%");
+                });
+            })
+            ->when(Arr::get($data, 'filter.name'), function ($query, $name) {
+                $query->where('grades.name', 'like', "%{$name}%");
+            })
+            ->when(Arr::get($data, 'filter.uuid'), function ($query, $uuid) {
+                $query->where('grades.uuid', $uuid);
+            })
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUuid) {
+                $query->where('grades.org_uuid', $orgUuid);
             });
-        }
-
-        $name = Arr::get($data, 'filter.name');
-        if (!empty($name)) {
-            $model->where('grades.name', 'like', "%$name%");
-        }
-
-        $uuid = Arr::get($data, 'filter.uuid');
-        if (!empty($uuid)) {
-            $model->where('grades.uuid', '=', "$uuid");
-        }
-
-        $orgUuid = Arr::get($data, 'filter.org_uuid');
-        if (!empty($orgUuid)) {
-            $model->where('grades.org_uuid', '=', "$orgUuid");
-        }
-
-        return $model;
     }
 
     public function browse($data = null)

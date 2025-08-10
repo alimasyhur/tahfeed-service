@@ -17,27 +17,20 @@ class UserRepository
 
     private function getQuery($data = null)
     {
-        $model = User::query()->select('uuid', 'name', 'email', 'created_at', 'updated_at');
-
-        $qWord = Arr::get($data, 'q');
-        if (!empty($qWord)) {
-            $model->where(function ($query) use ($qWord) {
-                $query->where('name', 'like', "%$qWord%")
-                    ->orWhere('email', 'like', "%$qWord%");
+        return User::query()
+            ->select(['uuid', 'name', 'email', 'created_at', 'updated_at'])
+            ->when(Arr::get($data, 'q'), function ($query, $qWord) {
+                $query->where(function ($subQuery) use ($qWord) {
+                    $subQuery->where('name', 'like', "%{$qWord}%")
+                            ->orWhere('email', 'like', "%{$qWord}%");
+                });
+            })
+            ->when(Arr::get($data, 'filter.name'), function ($query, $name) {
+                $query->where('name', 'like', "%{$name}%");
+            })
+            ->when(Arr::get($data, 'filter.email'), function ($query, $email) {
+                $query->where('email', 'like', "%{$email}%");
             });
-        }
-
-        $name = Arr::get($data, 'filter.name');
-        if (!empty($name)) {
-            $model->where('name', 'like', "%$name%");
-        }
-
-        $email = Arr::get($data, 'filter.email');
-        if (!empty($email)) {
-            $model->where('email', 'like', "%$email%");
-        }
-
-        return $model;
     }
 
     public function browse($data = null)
