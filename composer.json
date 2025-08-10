@@ -9,7 +9,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
-        "laravel/framework": "^10.10",
+        "laravel/framework": "10.48.29",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "ramsey/uuid": "^4.7"
