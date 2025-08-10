@@ -29,10 +29,16 @@ class SummaryRepository
         $endOfLastWeek = Carbon::now()->subWeek()->endOfWeek(Carbon::SUNDAY)->format('Y-m-d 23:59:59');
 
         $model = DB::table('report_histories as rh')
-            ->join('students as s', 'rh.student_uuid', '=', 's.uuid')
-            ->join('grades as g', 's.grade_uuid', '=', 'g.uuid')
-            ->join('organizations as o', 's.org_uuid', '=', 'o.uuid')
-            ->select(
+            ->join('students as s', function($join) {
+                $join->on('rh.student_uuid', '=', 's.uuid')
+                    ->whereNull('s.deleted_at');
+            })->join('grades as g', function($join) {
+                $join->on('s.grade_uuid', '=', 'g.uuid')
+                    ->whereNull('g.deleted_at');
+            })->join('organizations as o', function($join) {
+                $join->on('s.org_uuid', '=', 'o.uuid')
+                    ->whereNull('o.deleted_at');
+            })->select(
                 's.uuid',
                 's.nik',
                 's.nis',
@@ -110,8 +116,6 @@ class SummaryRepository
             "),
             )
             ->where('rh.org_uuid', $orgUUID)
-            ->where('rh.deleted_at', null)
-            ->where('o.deleted_at', null)
             ->groupBy('s.uuid', 'g.uuid', 'o.uuid')
             ->orderBy('s.firstname');
 

@@ -14,8 +14,10 @@ class GradeRepository
 
     private function getQuery($data = null)
     {
-        $model = Grade::join('organizations', 'grades.org_uuid', '=', 'organizations.uuid')
-            ->select('grades.*', 'organizations.name as org_name');
+        $model = Grade::join('organizations', function($join) {
+            $join->on('grades.org_uuid', '=', 'organizations.uuid')
+                ->whereNull('organizations.deleted_at');
+        })->select('grades.*', 'organizations.name as org_name');
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {

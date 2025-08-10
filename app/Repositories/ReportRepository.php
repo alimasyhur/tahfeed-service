@@ -22,8 +22,10 @@ class ReportRepository
 
     private function getQuery($data = null)
     {
-        $model = Report::join('students', 'reports.student_uuid', '=', 'students.uuid')
-        ->join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
+        $model = Report::join('students', function($join) {
+        $join->on('reports.student_uuid', '=', 'students.uuid')
+             ->whereNull('students.deleted_at');
+        })->join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
         ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
         ->select(
             'reports.*',

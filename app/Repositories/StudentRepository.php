@@ -16,8 +16,13 @@ class StudentRepository
 
     private function getQuery($data = null)
     {
-        $model = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
-            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid');
+        $model = Student::join('organizations', function($join) {
+            $join->on('students.org_uuid', '=', 'organizations.uuid')
+                ->whereNull('organizations.deleted_at');
+        })->join('grades', function($join) {
+            $join->on('students.grade_uuid', '=', 'grades.uuid')
+                ->whereNull('grades.deleted_at');
+        });
 
         $model->select(
             'students.*',
@@ -27,8 +32,10 @@ class StudentRepository
 
         $kelasUUID = Arr::get($data, 'filter.kelas_uuid');
         if (!empty($kelasUUID)) {
-            $model->join('kelas_students', 'students.uuid', '=', 'kelas_students.student_uuid')
-                ->select(
+            $model->join('kelas_students', function($join) {
+                $join->on('students.uuid', '=', 'kelas_students.student_uuid')
+                    ->whereNull('kelas_students.deleted_at');
+            })->select(
                     'students.*',
                     'organizations.name as org_name',
                     'grades.period AS grade_period',

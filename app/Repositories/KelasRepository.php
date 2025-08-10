@@ -15,10 +15,19 @@ class KelasRepository
 
     private function getQuery($data = null)
     {
-        $model = Kelas::join('organizations', 'kelas.org_uuid', '=', 'organizations.uuid')
-            ->join('grades', 'kelas.grade_uuid', '=', 'grades.uuid')
-            ->join('teachers', 'kelas.teacher_uuid', '=', 'teachers.uuid')
-            ->join('users', 'teachers.user_uuid', '=', 'users.uuid')
+        $model = Kelas::join('organizations', function($join) {
+            $join->on('kelas.org_uuid', '=', 'organizations.uuid')
+                ->whereNull('organizations.deleted_at');
+            })->join('grades', function($join) {
+                $join->on('kelas.grade_uuid', '=', 'grades.uuid')
+                    ->whereNull('grades.deleted_at');
+            })->join('teachers', function($join) {
+                $join->on('kelas.teacher_uuid', '=', 'teachers.uuid')
+                    ->whereNull('teachers.deleted_at');
+            })->join('users', function($join) {
+                $join->on('teachers.user_uuid', '=', 'users.uuid')
+                    ->whereNull('users.deleted_at');
+            })
             ->select(
                 'kelas.*',
                 'organizations.name as org_name',

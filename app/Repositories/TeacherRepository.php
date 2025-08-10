@@ -16,8 +16,10 @@ class TeacherRepository
 
     private function getQuery($data = null)
     {
-        $model = Teacher::join('organizations', 'teachers.org_uuid', '=', 'organizations.uuid')
-            ->select('teachers.*', 'organizations.name as org_name');
+        $model = Teacher::join('organizations', function($join) {
+            $join->on('teachers.org_uuid', '=', 'organizations.uuid')
+                ->whereNull('organizations.deleted_at');
+        })->select('teachers.*', 'organizations.name as org_name');
 
         $qWord = Arr::get($data, 'q');
         if (!empty($qWord)) {
