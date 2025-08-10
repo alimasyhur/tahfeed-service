@@ -153,7 +153,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $userUuid = $user->uuid;
         $profile = $this->repository->find($userUuid);
-        if ($profile->profile_image) {
+        if ($profile && $profile->profile_image) {
             Arr::set($profile, 'profile_image_url', $profile->getProfileImageUrlAttribute());
         }
 
@@ -161,7 +161,7 @@ class ProfileController extends Controller
         $roles = $this->roleRepository->browse($rolesFilter);
         $orgUuid = Arr::get($roles, '0.org_uuid');
         $organization = $this->orgRepository->findByUUID($orgUuid);
-        if ($organization->logo_image) {
+        if ($organization && $organization->logo_image) {
             Arr::set($organization, 'logo_image_url', $organization->getLogoImageThumbnailUrlAttribute());
         }
         $orgFilter = ['filter' => ['org_uuid' => $orgUuid]];
