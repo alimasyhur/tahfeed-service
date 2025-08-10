@@ -154,7 +154,7 @@ class ProfileController extends Controller
         $userUuid = $user->uuid;
         $profile = $this->repository->find($userUuid);
         if ($profile && $profile->profile_image) {
-            Arr::set($profile, 'profile_image_url', $profile->getProfileImageUrlAttribute());
+            Arr::set($profile, 'profile_image_url', $profile->getProfileImageThumbnailUrlAttribute());
         }
 
         $rolesFilter = ['filter' => ['user_uuid' => $userUuid]];
