@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadImageRequest;
-use App\Models\OrgUserRole;
 use App\Models\User;
 use App\Repositories\ImageUploadRepository;
 use App\Repositories\OrganizationRepository;
@@ -13,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ImageUploadController extends Controller
 {
@@ -48,8 +46,10 @@ class ImageUploadController extends Controller
             $image = $request->file('image');
 
             // Delete old profile image if exists
-            if ($profile->profile_image) {
-                $this->repository->deleteUserImage($profile->user_uuid, $profile->profile_image);
+            if ($profile) {
+                if ($profile->profile_image) {
+                    $this->repository->deleteUserImage($profile->user_uuid, $profile->profile_image);
+                }
             }
 
             // Upload new image
