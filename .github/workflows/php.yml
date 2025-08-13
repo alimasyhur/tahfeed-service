@@ -42,7 +42,7 @@ jobs:
           TARGET: "/var/www/tahfeed-service"
 
       - name: Run Remote Artisan Commands
-        uses: appleboy/ssh-action@8.1.6
+        uses: appleboy/ssh-action@0.1.6
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
