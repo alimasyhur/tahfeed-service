@@ -37,17 +37,18 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SOURCE: "."
+          EXCLUDE: ".env"
           REMOTE_HOST: ${{ secrets.VPS_HOST }}
           REMOTE_USER: ${{ secrets.VPS_USER }}
           TARGET: "/var/www/tahfeed-service"
 
       - name: Run Remote Artisan Commands
-        uses: appleboy/ssh-action@0.1.6
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/tahfeed-service
-            php artisan migrate
+            php artisan migrate --force
             php artisan optimize
