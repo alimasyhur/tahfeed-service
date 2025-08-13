@@ -80,11 +80,6 @@ class ImageUploadRepository
             ];
 
         } catch (Exception $e) {
-            Log::error("Profile image upload failed", [
-                'user_uuid' => $userUuid,
-                'error' => $e->getMessage(),
-                'file' => $image->getClientOriginalName() ?? 'unknown'
-            ]);
             throw new Exception("Failed to upload profile image: " . $e->getMessage());
         }
     }
@@ -133,11 +128,6 @@ class ImageUploadRepository
             ];
 
         } catch (Exception $e) {
-            Log::error("Organization logo upload failed", [
-                'org_uuid' => $orgUuid,
-                'error' => $e->getMessage(),
-                'file' => $image->getClientOriginalName() ?? 'unknown'
-            ]);
             throw new Exception("Failed to upload organization logo: " . $e->getMessage());
         }
     }
@@ -180,11 +170,6 @@ class ImageUploadRepository
             return $deleted;
 
         } catch (Exception $e) {
-            Log::error("Failed to delete user image", [
-                'user_uuid' => $userUuid,
-                'filename' => $filename,
-                'error' => $e->getMessage()
-            ]);
             return false;
         }
     }
@@ -227,11 +212,6 @@ class ImageUploadRepository
             return $deleted;
 
         } catch (Exception $e) {
-            Log::error("Failed to delete organization image", [
-                'org_uuid' => $orgUuid,
-                'filename' => $filename,
-                'error' => $e->getMessage()
-            ]);
             return false;
         }
     }
@@ -476,20 +456,9 @@ class ImageUploadRepository
                 Storage::disk('public')->deleteDirectory($basePath);
             }
 
-            Log::info("Bulk delete completed", [
-                'type' => $type,
-                'uuid' => $uuid,
-                'files_deleted' => $deleted
-            ]);
-
             return $deleted;
 
         } catch (Exception $e) {
-            Log::error("Bulk delete failed", [
-                'type' => $type,
-                'uuid' => $uuid,
-                'error' => $e->getMessage()
-            ]);
             return 0;
         }
     }
