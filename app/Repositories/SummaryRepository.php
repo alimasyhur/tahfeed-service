@@ -15,6 +15,7 @@ class SummaryRepository
     public function listSummary($data)
     {
         $orgUUID = Arr::get($data, 'filter.org_uuid');
+        $studentUUID = Arr::get($data, 'filter.student_uuid');
 
         $startOfWeekLabel = Carbon::now()->startOfWeek(Carbon::MONDAY)->format('d-M');
         $endOfWeekLabel = Carbon::now()->endOfWeek(Carbon::SUNDAY)->format('d-M');
@@ -108,7 +109,9 @@ class SummaryRepository
                         )
                     END AS m_total_pekan_lalu
             "),
-            )
+            )->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUUID) {
+                $query->where('rh.student_uuid', $studentUUID);
+            })
             ->where('rh.org_uuid', $orgUUID)
             ->where('rh.deleted_at', null)
             ->where('o.deleted_at', null)

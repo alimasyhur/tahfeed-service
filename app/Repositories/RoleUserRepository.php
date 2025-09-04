@@ -22,11 +22,13 @@ class RoleUserRepository
     {
         $model = OrgUserRole::join('users', 'orgs_users_roles.user_uuid', '=', 'users.uuid')
             ->leftJoin('teachers', 'orgs_users_roles.user_uuid', '=', 'teachers.user_uuid')
+            ->leftJoin('students', 'orgs_users_roles.user_uuid', '=', 'students.user_uuid')
             ->select(
                 'orgs_users_roles.*',
                 'users.name as user_name',
                 'users.email as email',
                 'teachers.uuid as teacher_uuid',
+                'students.uuid as student_uuid',
             );
 
         $qWord = Arr::get($data, 'q');

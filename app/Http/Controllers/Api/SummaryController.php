@@ -31,6 +31,7 @@ class SummaryController extends Controller
             $validator = Validator::make($request->all(), [
                 'q' => 'nullable|string',
                 'filter.org_uuid' => 'nullable|string',
+                'filter.student_uuid' => 'nullable|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),

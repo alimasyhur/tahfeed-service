@@ -33,6 +33,10 @@ class KelasRepository
                 $join->on('teachers.user_uuid', '=', 'users.uuid')
                     ->whereNull('users.deleted_at');
             })
+            ->leftJoin('kelas_students', function($join) {
+                $join->on('kelas.uuid', '=', 'kelas_students.kelas_uuid')
+                    ->whereNull('kelas_students.deleted_at');
+            })
             ->select([
                 'kelas.*',
                 'organizations.name as org_name',
@@ -62,6 +66,9 @@ class KelasRepository
             })
             ->when(Arr::get($data, 'filter.grade_uuid'), function ($query, $gradeUuid) {
                 $query->where('kelas.grade_uuid', $gradeUuid);
+            })
+            ->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUuid) {
+                $query->where('kelas_students.student_uuid', $studentUuid);
             });
     }
 

@@ -40,6 +40,7 @@ class KelasController extends Controller
                 'filter.teacher_uuid' => 'nullable|string',
                 'filter.org_uuid' => 'nullable|string',
                 'filter.grade_uuid' => 'nullable|string',
+                'filter.student_uuid' => 'nullable|string',
                 'page' => 'nullable|integer',
                 'limit' => 'nullable|integer',
                 'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
