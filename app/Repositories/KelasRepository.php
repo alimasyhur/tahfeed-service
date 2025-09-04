@@ -46,6 +46,7 @@ class KelasRepository
                 'users.email as teacher_email',
                 DB::raw("CONCAT(teachers.firstname, ' ', teachers.lastname) as teacher_full_name")
             ])
+            ->groupBy('kelas.uuid')
             ->when(Arr::get($data, 'q'), function ($query, $qWord) {
                 $query->where(function ($subQuery) use ($qWord) {
                     $subQuery->where('kelas.name', 'like', "%{$qWord}%")
