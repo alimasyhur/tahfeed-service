@@ -238,4 +238,29 @@ class ReportRepository
         $model = $this->getQuery($data);
         return $model->count();
     }
+
+    public function getWeeklyReportData($data)
+    {
+        return Report::select(
+                DB::raw('YEARWEEK(date_input, 1) as week'),
+                DB::raw('DATE(MIN(date_input)) as week_start'),
+                DB::raw('DATE(MAX(date_input)) as week_end'),
+                DB::raw('COUNT(*) as reports')
+            )
+            ->where('is_locked', true)
+            ->where('deleted_at', null)
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+                $query->where('org_uuid', $orgUUID);
+            })
+            ->when(Arr::get($data, 'filter.teacher_uuid'), function ($query, $teacherUUID) {
+                $query->where('teacher_uuid', $teacherUUID);
+            })
+            ->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUUID) {
+                $query->where('student_uuid', $studentUUID);
+            })
+            ->groupBy(DB::raw('YEARWEEK(date_input, 1)'))
+            ->orderBy('week', 'asc')
+            ->get()
+            ->toArray();
+    }
 }

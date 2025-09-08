@@ -117,6 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('reports')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\ReportController::class, 'index']);
+        Route::get('/summary', [\App\Http\Controllers\Api\ReportController::class, 'getWeeklyReportData']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\ReportController::class, 'show']);
         Route::patch('/{uuid}/lock', [\App\Http\Controllers\Api\ReportController::class, 'lock']);
         Route::patch('/{uuid}/unlock', [\App\Http\Controllers\Api\ReportController::class, 'unlock']);

@@ -517,4 +517,36 @@ class ReportController extends Controller
             ], $errCode);
         }
     }
+
+    public function getWeeklyReportData(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.teacher_uuid' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
+                'filter.student_uuid' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $reportData = $this->repository->getWeeklyReportData($validator);
+
+            return response()->json([
+                'status' => ReportResponse::SUCCESS,
+                'message' => ReportResponse::SUCCESS_RETRIEVED,
+                'data' => $reportData,
+            ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => ReportResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
 }
