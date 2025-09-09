@@ -263,4 +263,32 @@ class ReportRepository
             ->get()
             ->toArray();
     }
+
+    public function getSetoranData($data)
+    {
+        return Report::join('template_quran_juz_pages as start_juz_pages', 'reports.start_juz_page_uuid', '=', 'start_juz_pages.uuid')
+            ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
+            ->select(
+                DB::raw('DATE(reports.date_input) as date'),
+                DB::raw('SUM(end_juz_pages.value - start_juz_pages.value) as jumlah_halaman')
+            )
+            ->where('reports.is_locked', true)
+            ->where('reports.deleted_at', null)
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+                $query->where('reports.org_uuid', $orgUUID);
+            })
+            ->when(Arr::get($data, 'filter.teacher_uuid'), function ($query, $teacherUUID) {
+                $query->where('reports.teacher_uuid', $teacherUUID);
+            })
+            ->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUUID) {
+                $query->where('reports.student_uuid', $studentUUID);
+            })
+            ->groupBy(DB::raw('DATE(reports.date_input)'))
+            ->orderBy('date', 'asc')
+            ->get()
+            ->toArray();
+    }
 }
+
+
+
