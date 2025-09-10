@@ -6,7 +6,6 @@ use App\Helpers\CommonHelper;
 use App\Models\OrgUserRole;
 use App\Models\Role;
 use App\Models\Student;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -56,7 +55,6 @@ class StudentRepository
             })
             ->when(Arr::get($data, 'q'), function ($query, $qWord) {
                 $query->where(function ($subQuery) use ($qWord) {
-                    // Prioritas pencarian: nama, nis/nik, phone, bio
                     $subQuery->where('students.firstname', 'like', "%{$qWord}%")
                             ->orWhere('students.lastname', 'like', "%{$qWord}%")
                             ->orWhere('students.nis', 'like', "%{$qWord}%")
