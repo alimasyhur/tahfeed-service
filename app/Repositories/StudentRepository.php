@@ -21,6 +21,7 @@ class StudentRepository
 
         $baseSelect = [
             'students.*',
+            'users.email as user_email',
             'organizations.name as org_name',
             'grades.period as grade_period',
             DB::raw("CONCAT(students.firstname, ' ', students.lastname) as full_name")
@@ -38,6 +39,10 @@ class StudentRepository
             ->join('grades', function($join) {
                 $join->on('students.grade_uuid', '=', 'grades.uuid')
                     ->whereNull('grades.deleted_at');
+            })
+            ->leftJoin('users', function($join) {
+                $join->on('students.user_uuid', '=', 'users.uuid')
+                    ->whereNull('users.deleted_at');
             })
             ->when($kelasUUID, function ($query) use ($selectWithKelas, $kelasUUID) {
                 $query->join('kelas_students', function($join) use ($kelasUUID) {
