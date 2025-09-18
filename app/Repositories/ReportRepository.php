@@ -270,7 +270,7 @@ class ReportRepository
             ->join('template_quran_juz_pages as end_juz_pages', 'reports.end_juz_page_uuid', '=', 'end_juz_pages.uuid')
             ->select(
                 DB::raw('DATE(reports.date_input) as date'),
-                DB::raw('SUM(end_juz_pages.value - start_juz_pages.value) as jumlah_halaman')
+                DB::raw('SUM((end_juz_pages.value - start_juz_pages.value) + 1) as jumlah_halaman')
             )
             ->where('reports.is_locked', true)
             ->where('reports.deleted_at', null)
