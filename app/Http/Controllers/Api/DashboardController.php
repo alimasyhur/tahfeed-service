@@ -53,7 +53,7 @@ class DashboardController extends Controller
             $totalTeachers = $this->teacherRepository->count($validator);
             $totalReports = $this->reportRepository->count($validator);
             $totalReports = $this->reportRepository->count($validator);
-            $totalKelases = $this->kelasRepository->count($validator);
+            $totalKelases = $this->kelasRepository->dashboardCount($validator);
 
             $response = [
                 'totalStudents'     => $totalStudents,

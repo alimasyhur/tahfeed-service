@@ -47,6 +47,7 @@ class KelasRepository
                 DB::raw("CONCAT(teachers.firstname, ' ', teachers.lastname) as teacher_full_name")
             ])
             ->groupBy('kelas.uuid')
+            ->whereNull('kelas.deleted_at')
             ->when(Arr::get($data, 'q'), function ($query, $qWord) {
                 $query->where(function ($subQuery) use ($qWord) {
                     $subQuery->where('kelas.name', 'like', "%{$qWord}%")
@@ -70,6 +71,18 @@ class KelasRepository
             })
             ->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUuid) {
                 $query->where('kelas_students.student_uuid', $studentUuid);
+            });
+    }
+
+    private function dashboardGetQuery($data = null)
+    {
+        return Kelas::query()
+            ->select([
+                'kelas.*',
+            ])
+            ->whereNull('kelas.deleted_at')
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUuid) {
+                $query->where('kelas.org_uuid', $orgUuid);
             });
     }
 
@@ -190,6 +203,12 @@ class KelasRepository
     public function count($data)
     {
         $model = $this->getQuery($data);
+        return $model->count();
+    }
+
+    public function dashboardCount($data)
+    {
+        $model = $this->dashboardGetQuery($data);
         return $model->count();
     }
 
