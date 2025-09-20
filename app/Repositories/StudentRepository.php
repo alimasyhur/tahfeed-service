@@ -99,8 +99,39 @@ class StudentRepository
     {
         $profile = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
             ->join('grades', 'students.grade_uuid', '=', 'grades.uuid')
+            ->leftJoin('users', 'students.user_uuid', '=', 'users.uuid')
             ->where('students.uuid', $uuid)
-            ->select('students.*', 'organizations.name AS org_name', 'grades.name AS grade_name')
+            ->select(
+                'students.*',
+                'organizations.name AS org_name',
+                'grades.name AS grade_name',
+                'users.email AS user_email',
+            )->first();
+
+        return $profile;
+    }
+
+    public function findByUsername($username)
+    {
+        $user = DB::table('users')
+            ->where('email', 'like', "$username@%")
+            ->whereNull('deleted_at')
+            ->first();
+
+        if (!$user) {
+            return null;
+        }
+
+        $profile = Student::join('organizations', 'students.org_uuid', '=', 'organizations.uuid')
+            ->join('grades', 'students.grade_uuid', '=', 'grades.uuid')
+            ->leftJoin('users', 'students.uuid', '=', 'users.uuid')
+            ->where('students.user_uuid', $user->uuid)
+            ->select(
+                'students.*',
+                'organizations.name AS org_name',
+                'grades.name AS grade_name',
+                'users.email AS user_email'
+            )
             ->first();
 
         return $profile;

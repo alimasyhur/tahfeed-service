@@ -177,6 +177,9 @@ class OrganizationController extends Controller
     public function showByDomain($domain, Request $request)
     {
         $organization = $this->repository->findByDomain($domain);
+        if ($organization && $organization->logo_image) {
+            Arr::set($organization, 'logo_image_url', $organization->getLogoImageThumbnailUrlAttribute());
+        }
 
         if(empty($organization)) {
             return response()->json([

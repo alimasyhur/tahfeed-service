@@ -106,6 +106,40 @@ class StudentController extends Controller
             ],
         ];
         $summary = $this->summaryRepository->summary($filterSummary);
+        $summary->user_email = strstr($student->user_email, '@', true);
+
+        return response()->json([
+            'status' => StudentResponse::SUCCESS,
+            'message' => StudentResponse::SUCCESS_RETRIEVED,
+            'data' => [
+                'student' => $summary,
+            ],
+        ]);
+    }
+
+    public function showByUsername($username)
+    {
+        $student = $this->repository->findByUsername($username);
+
+        if(empty($student)) {
+            dd($student);
+
+            return response()->json([
+                'status' => StudentResponse::SUCCESS,
+                'message' => StudentResponse::NOT_FOUND,
+                'error' => true,
+                'data' => [],
+            ], 404);
+        }
+
+        $filterSummary = [
+            'filter' => [
+                'student_uuid' => $student->uuid,
+            ],
+        ];
+        $summary = $this->summaryRepository->summary($filterSummary);
+        $summary->user_email = strstr($student->user_email, '@', true);
+
         return response()->json([
             'status' => StudentResponse::SUCCESS,
             'message' => StudentResponse::SUCCESS_RETRIEVED,

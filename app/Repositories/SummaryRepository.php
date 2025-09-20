@@ -14,9 +14,6 @@ class SummaryRepository
 
     public function listSummary($data)
     {
-        $orgUUID = Arr::get($data, 'filter.org_uuid');
-        $studentUUID = Arr::get($data, 'filter.student_uuid');
-
         $startOfWeekLabel = Carbon::now()->startOfWeek(Carbon::MONDAY)->format('d-M');
         $endOfWeekLabel = Carbon::now()->endOfWeek(Carbon::SUNDAY)->format('d-M');
 
@@ -112,7 +109,9 @@ class SummaryRepository
             )->when(Arr::get($data, 'filter.student_uuid'), function ($query, $studentUUID) {
                 $query->where('rh.student_uuid', $studentUUID);
             })
-            ->where('rh.org_uuid', $orgUUID)
+            ->when(Arr::get($data, 'filter.org_uuid'), function ($query, $orgUUID) {
+                $query->where('rh.org_uuid', $orgUUID);
+            })
             ->where('rh.deleted_at', null)
             ->where('o.deleted_at', null)
             ->groupBy('s.uuid', 'g.uuid', 'o.uuid')
@@ -157,6 +156,7 @@ class SummaryRepository
                 's.birthdate',
                 'g.name as grade_name',
                 'o.name as organization_name',
+                'o.domain as organization_domain',
                 DB::raw("
                 CASE
                     WHEN COUNT(DISTINCT rh.juz_page_uuid) < 20 THEN CONCAT(COUNT(DISTINCT rh.juz_page_uuid), ' Halaman')

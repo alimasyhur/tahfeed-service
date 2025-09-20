@@ -581,4 +581,129 @@ class ReportController extends Controller
             ], $errCode);
         }
     }
+
+    public function publicIndex(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.teacher_uuid' => 'nullable|string',
+                'filter.org_uuid' => 'nullable|string',
+                'filter.username' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $student = $this->studentRepository->findByUsername(Arr::get($validator, 'filter.username'));
+            if (empty($student)) {
+                return response()->json([
+                    'status' => StudentResponse::ERROR,
+                    'message' => StudentResponse::NOT_FOUND,
+                    'data' => [],
+                ], 422);
+            }
+            Arr::set($validator, 'filter.student_uuid', $student->uuid);
+
+            $reports = $this->repository->browse($validator);
+            $totalReports = $this->repository->count($validator);
+
+            return response()->json([
+                'status' => ReportResponse::SUCCESS,
+                'message' => ReportResponse::SUCCESS_ALL_RETRIEVED,
+                'data' => $reports,
+                'total' => $totalReports,
+            ]);
+
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => ReportResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function getPublicWeeklyReportData(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.username' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $student = $this->studentRepository->findByUsername(Arr::get($validator, 'filter.username'));
+            if (empty($student)) {
+                return response()->json([
+                    'status' => StudentResponse::ERROR,
+                    'message' => StudentResponse::NOT_FOUND,
+                    'data' => [],
+                ], 422);
+            }
+            Arr::set($validator, 'filter.student_uuid', $student->uuid);
+
+            $reportData = $this->repository->getWeeklyReportData($validator);
+
+            return response()->json([
+                'status' => ReportResponse::SUCCESS,
+                'message' => ReportResponse::SUCCESS_RETRIEVED,
+                'data' => $reportData,
+            ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => ReportResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
+
+    public function getPublicSetoranData(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'q' => 'nullable|string',
+                'filter.username' => 'nullable|string',
+                'page' => 'nullable|integer',
+                'limit' => 'nullable|integer',
+                'sortOrder' => sprintf('nullable|string|in:%s,%s', Pagination::ASC_PARAM, Pagination::DESC_PARAM),
+                'sortField' => 'nullable|string',
+            ])->safe()->all();
+
+            $student = $this->studentRepository->findByUsername(Arr::get($validator, 'filter.username'));
+            if (empty($student)) {
+                return response()->json([
+                    'status' => StudentResponse::ERROR,
+                    'message' => StudentResponse::NOT_FOUND,
+                    'data' => [],
+                ], 422);
+            }
+            Arr::set($validator, 'filter.student_uuid', $student->uuid);
+
+            $reportData = $this->repository->getSetoranData($validator);
+
+            return response()->json([
+                'status' => ReportResponse::SUCCESS,
+                'message' => ReportResponse::SUCCESS_RETRIEVED,
+                'data' => $reportData,
+            ]);
+        } catch (\Throwable $th) {
+            $errMessage = $th->getMessage();
+            $errCode = CommonHelper::getStatusCode($errMessage);
+
+            return response()->json([
+                'status' => ReportResponse::ERROR,
+                'message' => $errMessage,
+            ], $errCode);
+        }
+    }
 }

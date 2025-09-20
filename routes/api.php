@@ -25,6 +25,10 @@ Route::prefix('auth')->group(function() {
 });
 
 Route::get('/orgs/domain/{domain}', [\App\Http\Controllers\Api\OrganizationController::class, 'showByDomain']);
+Route::get('/stds/{username}', [\App\Http\Controllers\Api\StudentController::class, 'showByUsername']);
+Route::get('/rpts', [\App\Http\Controllers\Api\ReportController::class, 'publicIndex']);
+Route::get('/rpts/summary', [\App\Http\Controllers\Api\ReportController::class, 'getPublicWeeklyReportData']);
+Route::get('/rpts/setoran', [\App\Http\Controllers\Api\ReportController::class, 'getPublicSetoranData']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function() {
