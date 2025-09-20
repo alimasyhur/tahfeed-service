@@ -24,6 +24,8 @@ Route::prefix('auth')->group(function() {
     });
 });
 
+Route::get('/orgs/domain/{domain}', [\App\Http\Controllers\Api\OrganizationController::class, 'showByDomain']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\UserController::class, 'index']);
@@ -37,7 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('orgs')->group(function() {
         Route::get('/', [\App\Http\Controllers\Api\OrganizationController::class, 'index']);
         Route::get('/me/{uuid}', [\App\Http\Controllers\Api\OrganizationController::class, 'show']);
-        Route::get('/domain/{domain}', [\App\Http\Controllers\Api\OrganizationController::class, 'showByDomain']);
         Route::post('/', [\App\Http\Controllers\Api\OrganizationController::class, 'store']);
         Route::patch('/{uuid}', [\App\Http\Controllers\Api\OrganizationController::class, 'update']);
     });

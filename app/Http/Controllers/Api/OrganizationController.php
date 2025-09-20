@@ -176,8 +176,7 @@ class OrganizationController extends Controller
 
     public function showByDomain($domain, Request $request)
     {
-        $userUuid = $request->user()->uuid;
-        $organization = $this->repository->findByDomain($domain, $userUuid);
+        $organization = $this->repository->findByDomain($domain);
 
         if(empty($organization)) {
             return response()->json([

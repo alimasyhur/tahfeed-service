@@ -13,6 +13,7 @@ use App\Repositories\RoleRepository;
 use App\Repositories\RoleUserRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;

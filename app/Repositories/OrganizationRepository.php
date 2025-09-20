@@ -122,16 +122,9 @@ class OrganizationRepository
         return $organization;
     }
 
-    public function findByDomain($domain, $userUuid)
+    public function findByDomain($domain)
     {
-        if (RoleUserRepository::isSuperAdmin($userUuid)) {
-            $organization = Organization::where('domain', $domain)
-                ->first();
-        } else {
-            $organization = Organization::where('created_by', $userUuid)
-                ->where('domain', $domain)
-                ->first();
-        }
+        $organization = Organization::where('domain', $domain)->first();
 
         $organization = $this->includeLabel($organization);
 
